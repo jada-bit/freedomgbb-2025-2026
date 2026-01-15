@@ -19,8 +19,8 @@
         .active-nav { background-color: var(--eagle-gold); color: black; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .inactive-nav { color: #9ca3af; }
         .inactive-nav:hover { color: white; }
-        .high-stat { color: #10b981; font-weight: 900; } /* Green for Highs */
-        .low-stat { color: #ef4444; font-weight: 900; }  /* Red for Lows */
+        .high-stat { color: #10b981; font-weight: 900; } 
+        .low-stat { color: #ef4444; font-weight: 900; }
         .clipboard-card { background: #0a0a0a; border: 1px solid #222; border-top: 4px solid var(--eagle-gold); }
     </style>
 </head>
@@ -71,7 +71,7 @@
                                 <th class="p-2 text-center">2PM</th><th class="p-2 text-center">2PA</th>
                                 <th class="p-2 text-center">3PM</th><th class="p-2 text-center">3PA</th>
                                 <th class="p-2 text-center">FTM</th><th class="p-2 text-center">FTA</th>
-                                <th class="p-2 text-center text-green-500">OREB</th><th class="p-2 text-center">DREB</th>
+                                <th class="p-2 text-center text-white">REB</th>
                                 <th class="p-2 text-center">AST</th><th class="p-2 text-center">STL</th>
                                 <th class="p-2 text-center">TO</th><th class="p-2 text-center">FLS</th>
                             </tr>
@@ -88,21 +88,21 @@
         <!-- COACH'S CLIPBOARD -->
         <main id="view-clipboard" class="hidden p-4 md:p-8 space-y-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Point 1: AST:TO Ratio -->
+                <!-- Ball Security -->
                 <div class="clipboard-card p-6 rounded-2xl">
                     <h3 class="text-lg font-black uppercase italic mb-1">Ball Security</h3>
                     <p class="text-[10px] text-gray-500 uppercase mb-4 tracking-tighter">Goal: 2.0 Ratio (AST:TO)</p>
                     <div id="securityLeaders" class="space-y-2"></div>
                 </div>
 
-                <!-- Point 2: Offensive Rebounding -->
+                <!-- Rebound Dominance -->
                 <div class="clipboard-card p-6 rounded-2xl">
-                    <h3 class="text-lg font-black uppercase italic mb-1 text-green-500">Extra Possessions</h3>
-                    <p class="text-[10px] text-gray-500 uppercase mb-4 tracking-tighter">Total Offensive Rebounds (OREB)</p>
-                    <div id="orebLeaders" class="space-y-2"></div>
+                    <h3 class="text-lg font-black uppercase italic mb-1 text-white">Board Dominance</h3>
+                    <p class="text-[10px] text-gray-500 uppercase mb-4 tracking-tighter">Season Average Rebounds (RPG)</p>
+                    <div id="reboundLeaders" class="space-y-2"></div>
                 </div>
 
-                <!-- Point 3 & 4: Team Aggression & Ball Movement -->
+                <!-- Team Aggression & Movement -->
                 <div class="clipboard-card p-6 rounded-2xl">
                     <h3 class="text-lg font-black uppercase italic mb-4">Team Philosophy</h3>
                     <div id="teamPhilo" class="space-y-4"></div>
@@ -111,7 +111,7 @@
 
             <!-- Honor Roll / Ties Integrated -->
             <div class="bg-black border border-gray-800 p-6 rounded-2xl">
-                <h3 class="text-lg font-black uppercase italic mb-6 border-b border-gray-800 pb-2">Season High Records</h3>
+                <h3 class="text-lg font-black uppercase italic mb-6 border-b border-gray-800 pb-2">Season Record Holders (Individual Games)</h3>
                 <div id="honorRoll" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
             </div>
         </main>
@@ -139,7 +139,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                     <select id="recordPlayer" onchange="runSearch()" class="bg-gray-900 border border-gray-700 p-3 rounded-xl outline-none focus:border-gold"><option value="all">Entire Team</option></select>
                     <select id="recordStat" onchange="runSearch()" class="bg-gray-900 border border-gray-700 p-3 rounded-xl outline-none focus:border-gold">
-                        <option value="pts">Points</option><option value="oreb">Offensive Rebs</option><option value="ast">Assists</option><option value="stl">Steals</option><option value="to">Turnovers</option>
+                        <option value="pts">Points</option><option value="reb">Total Rebounds</option><option value="ast">Assists</option><option value="stl">Steals</option><option value="to">Turnovers</option>
                     </select>
                 </div>
                 <div id="recordResults" class="space-y-2"></div>
@@ -183,7 +183,7 @@
             ROSTER.forEach(p => {
                 entryTable.innerHTML += `<tr class="border-b border-gray-900">
                     <td class="p-4 font-bold text-gray-400 sticky-col">#${p.id} ${p.name}</td>
-                    ${['fg2m','fg2a','fg3m','fg3a','ftm','fta','oreb','dreb','ast','stl','to','fouls'].map(s => `
+                    ${['fg2m','fg2a','fg3m','fg3a','ftm','fta','reb','ast','stl','to','fouls'].map(s => `
                         <td class="p-2 text-center"><input type="number" data-player="${p.name}" data-stat="${s}" class="stat-input"></td>
                     `).join('')}
                 </tr>`;
@@ -207,45 +207,44 @@
         }
 
         function saveGame() {
-            const h = JSON.parse(localStorage.getItem('eagleStatsV4') || '[]');
+            const h = JSON.parse(localStorage.getItem('eagleStatsFinal_v5') || '[]');
             const game = { date: document.getElementById('gameDate').value, opp: document.getElementById('opponent').value || 'TBD', stats: [] };
             ROSTER.forEach(p => {
                 const s = { name: p.name, id: p.id };
                 document.querySelectorAll(`[data-player="${p.name}"]`).forEach(i => s[i.dataset.stat] = parseInt(i.value) || 0);
                 s.pts = (s.fg2m * 2) + (s.fg3m * 3) + s.ftm;
-                s.treb = s.oreb + s.dreb;
                 game.stats.push(s);
             });
-            h.push(game); localStorage.setItem('eagleStatsV4', JSON.stringify(h));
+            h.push(game); localStorage.setItem('eagleStatsFinal_v5', JSON.stringify(h));
             alert("Coach, Data Logged."); location.reload();
         }
 
         function renderCoachClipboard() {
-            const h = JSON.parse(localStorage.getItem('eagleStatsV4') || '[]');
+            const h = JSON.parse(localStorage.getItem('eagleStatsFinal_v5') || '[]');
             if (h.length === 0) return;
 
             const pTotals = {};
             const allPerformances = [];
-            let teamAst = 0, teamFgm = 0, teamFta = 0, team3pa = 0;
+            let teamAst = 0, teamFgm = 0, teamFta = 0, teamFga = 0;
 
-            ROSTER.forEach(p => pTotals[p.name] = { ast:0, to:0, oreb:0, pts:0, treb:0 });
+            ROSTER.forEach(p => pTotals[p.name] = { ast:0, to:0, reb:0, pts:0, gp:0 });
 
             h.forEach(g => {
                 g.stats.forEach(s => {
+                    pTotals[s.name].gp++;
                     pTotals[s.name].ast += s.ast; pTotals[s.name].to += s.to;
-                    pTotals[s.name].oreb += s.oreb; pTotals[s.name].treb += s.treb;
-                    pTotals[s.name].pts += s.pts;
+                    pTotals[s.name].reb += s.reb; pTotals[s.name].pts += s.pts;
                     teamAst += s.ast; teamFgm += (s.fg2m + s.fg3m);
-                    teamFta += s.fta; team3pa += (s.fg3a + s.fg2a); // 3pa for meter
-                    allPerformances.push({ name: s.name, pts: s.pts, ast: s.ast, reb: s.treb, oreb: s.oreb, opp: g.opp, date: g.date });
+                    teamFta += s.fta; teamFga += (s.fg2a + s.fg3a);
+                    allPerformances.push({ name: s.name, pts: s.pts, ast: s.ast, reb: s.reb, opp: g.opp, date: g.date });
                 });
             });
 
-            // 1. Security Leaders
+            // 1. Ball Security
             const security = ROSTER.map(p => ({
                 name: p.name,
                 ratio: pTotals[p.name].to > 0 ? (pTotals[p.name].ast / pTotals[p.name].to).toFixed(1) : pTotals[p.name].ast
-            })).sort((a,b) => b.ratio - a.ratio);
+            })).sort((a,b) => b.ratio - a.ratio).filter(x => x.ratio > 0);
 
             document.getElementById('securityLeaders').innerHTML = security.slice(0,5).map(p => `
                 <div class="flex justify-between p-2 rounded bg-gray-900 border border-gray-800">
@@ -253,21 +252,21 @@
                     <span class="font-black ${p.ratio >= 2 ? 'text-green-500' : 'text-gold'}">${p.ratio}</span>
                 </div>`).join('');
 
-            // 2. OREB Leaders (Aggression)
-            const oreb = ROSTER.map(p => ({
+            // 2. Rebound Leaders
+            const boards = ROSTER.map(p => ({
                 name: p.name,
-                val: pTotals[p.name].oreb
-            })).sort((a,b) => b.val - a.val);
+                avg: pTotals[p.name].gp > 0 ? (pTotals[p.name].reb / pTotals[p.name].gp).toFixed(1) : 0
+            })).sort((a,b) => b.avg - a.avg).filter(x => x.avg > 0);
 
-            document.getElementById('orebLeaders').innerHTML = oreb.slice(0,5).map(p => `
+            document.getElementById('reboundLeaders').innerHTML = boards.slice(0,5).map(p => `
                 <div class="flex justify-between p-2 rounded bg-gray-900 border border-gray-800">
                     <span class="text-xs font-bold">${p.name}</span>
-                    <span class="font-black text-white">${p.val}</span>
+                    <span class="font-black text-white">${p.avg}</span>
                 </div>`).join('');
 
-            // 3. Team Philosophy Calculations
+            // 3. Philosophy
             const astOnFgm = teamFgm > 0 ? (teamAst / teamFgm * 100).toFixed(0) : 0;
-            const ftRatio = team3pa > 0 ? (teamFta / team3pa).toFixed(2) : 0;
+            const ftAggression = teamFga > 0 ? (teamFta / teamFga).toFixed(2) : 0;
 
             document.getElementById('teamPhilo').innerHTML = `
                 <div class="space-y-2">
@@ -279,103 +278,87 @@
                 </div>
                 <div class="pt-2 border-t border-gray-800">
                     <div class="text-[9px] uppercase font-bold text-gray-500 mb-1">FT Aggression (FTA / FGA)</div>
-                    <div class="text-xl font-black">${ftRatio} <span class="text-[10px] text-gray-600 font-normal ml-2 italic">Higher = Attacking rim more</span></div>
+                    <div class="text-xl font-black">${ftAggression} <span class="text-[10px] text-gray-600 font-normal ml-2 italic">Higher = Attacking rim more</span></div>
                 </div>`;
 
-            // 4. Honor Roll with Ties
+            // 4. Record Holders (Ties Included)
             const findHighs = (key) => {
                 let max = Math.max(...allPerformances.map(o => o[key]));
                 return allPerformances.filter(o => o[key] === max && max > 0);
             };
 
-            const sections = [
-                { title: 'Points', key: 'pts' },
-                { title: 'Rebounds', key: 'reb' },
-                { title: 'Assists', key: 'ast' }
-            ];
+            const sections = [ { title: 'Points', key: 'pts' }, { title: 'Rebounds', key: 'reb' }, { title: 'Assists', key: 'ast' } ];
 
             document.getElementById('honorRoll').innerHTML = sections.map(sec => {
                 const winners = findHighs(sec.key);
                 return `<div class="p-4 bg-gray-900 border border-gray-800 rounded-xl">
-                    <div class="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-3">${sec.title} Season High</div>
+                    <div class="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-3">${sec.title} Game High</div>
                     ${winners.map(w => `
                         <div class="mb-3 border-l-2 border-gold pl-3">
                             <div class="text-lg font-black italic uppercase leading-none">${w.name}</div>
                             <div class="text-2xl font-black text-white">${w[sec.key]}</div>
                             <div class="text-[8px] text-gray-600 uppercase mt-1">${w.date} vs ${w.opp}</div>
-                        </div>
-                    `).join('') || '<div class="text-gray-700 italic text-xs">No records yet</div>'}
+                        </div>`).join('') || '<div class="text-gray-700 italic text-xs">No records logged</div>'}
                 </div>`;
             }).join('');
         }
 
         function renderSeasonSummary() {
-            const h = JSON.parse(localStorage.getItem('eagleStatsV4') || '[]');
-            const pMap = {}; const team = { pts: 0, oreb: 0, treb:0, ast: 0, stl: 0, to: 0, gp: h.length };
-            ROSTER.forEach(r => pMap[r.name] = { gp:0, pts:0, oreb:0, treb:0, ast:0, to:0, h:0, l:Infinity });
+            const h = JSON.parse(localStorage.getItem('eagleStatsFinal_v5') || '[]');
+            const pMap = {}; const team = { pts: 0, reb:0, ast: 0, stl: 0, to: 0, gp: h.length };
+            ROSTER.forEach(r => pMap[r.name] = { gp:0, pts:0, reb:0, ast:0, to:0, h:0, l:Infinity });
             h.forEach(game => {
                 game.stats.forEach(s => {
                     const p = pMap[s.name]; if (!p) return;
-                    p.gp++; p.pts += s.pts; p.oreb += s.oreb; p.treb += s.treb; p.ast += s.ast; p.to += s.to;
-                    team.pts += s.pts; team.oreb += s.oreb; team.treb += s.treb; team.ast += s.ast; team.stl += s.stl; team.to += s.to;
+                    p.gp++; p.pts += s.pts; p.reb += s.reb; p.ast += s.ast; p.to += s.to;
+                    team.pts += s.pts; team.reb += s.reb; team.ast += s.ast; team.stl += s.stl; team.to += s.to;
                     if(s.pts > p.h) p.h = s.pts; if(s.pts < p.l) p.l = s.pts;
                 });
             });
 
-            // Highlights
             const maxPts = Math.max(...Object.values(pMap).map(p => p.pts/p.gp || 0));
-            const minTo = Math.min(...Object.values(pMap).map(p => p.to/p.gp || Infinity));
+            const minTo = Math.min(...Object.values(pMap).map(p => p.gp > 0 ? p.to/p.gp : Infinity));
 
-            const metrics = [{l:'PPG', v:(team.pts/team.gp)}, {l:'OREB', v:(team.oreb/team.gp)}, {l:'RPG', v:(team.treb/team.gp)}, {l:'APG', v:(team.ast/team.gp)}, {l:'TOPG', v:(team.to/team.gp), c:'text-red-500'}];
+            const metrics = [{l:'PPG', v:(team.pts/team.gp)}, {l:'RPG', v:(team.reb/team.gp)}, {l:'APG', v:(team.ast/team.gp)}, {l:'SPG', v:(team.stl/team.gp)}, {l:'TOPG', v:(team.to/team.gp), c:'text-red-500'}];
             document.getElementById('team-stats-grid').innerHTML = metrics.map(m => `<div class="bg-black border border-gray-800 p-6 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">${m.l}</div><div class="text-3xl font-black italic ${m.c || 'text-white'}">${(m.v || 0).toFixed(1)}</div></div>`).join('');
             
-            let html = `<table class="w-full text-left text-xs"><thead class="bg-gray-950 text-gray-500 uppercase text-[9px] tracking-widest"><tr><th class="p-4">Player</th><th>GP</th><th>PPG</th><th>ORPG</th><th>RPG</th><th>APG</th><th>TOPG</th><th>H/L (Pts)</th></tr></thead><tbody>`;
+            let html = `<table class="w-full text-left text-xs"><thead class="bg-gray-950 text-gray-500 uppercase text-[9px] tracking-widest"><tr><th class="p-4">Player</th><th>GP</th><th>PPG</th><th>RPG</th><th>APG</th><th>TOPG</th><th>H/L (Pts)</th></tr></thead><tbody>`;
             for(let name in pMap) {
                 const p = pMap[name]; if(p.gp === 0) continue;
-                const ppg = (p.pts/p.gp);
-                const toavg = (p.to/p.gp);
-                html += `<tr class="border-b border-gray-900">
-                    <td class="p-4 font-bold text-gold">${name}</td>
-                    <td>${p.gp}</td>
-                    <td class="${ppg === maxPts ? 'high-stat' : ''}">${ppg.toFixed(1)}</td>
-                    <td class="text-white font-bold">${(p.oreb/p.gp).toFixed(1)}</td>
-                    <td>${(p.treb/p.gp).toFixed(1)}</td>
-                    <td>${(p.ast/p.gp).toFixed(1)}</td>
-                    <td class="${toavg === minTo ? 'high-stat' : ''}">${toavg.toFixed(1)}</td>
-                    <td><span class="text-green-500">${p.h}</span> / <span class="text-red-500">${p.l}</span></td>
-                </tr>`;
+                const ppg = (p.pts/p.gp); const toavg = (p.to/p.gp);
+                html += `<tr class="border-b border-gray-900"><td class="p-4 font-bold text-gold">${name}</td><td>${p.gp}</td><td class="${ppg === maxPts && ppg > 0 ? 'high-stat' : ''}">${ppg.toFixed(1)}</td><td class="text-white font-bold">${(p.reb/p.gp).toFixed(1)}</td><td>${(p.ast/p.gp).toFixed(1)}</td><td class="${toavg === minTo && p.gp > 0 ? 'high-stat' : ''}">${toavg.toFixed(1)}</td><td><span class="text-green-500">${p.h}</span> / <span class="text-red-500">${p.l}</span></td></tr>`;
             }
             document.getElementById('summaryTableArea').innerHTML = html + `</tbody></table>`;
         }
 
         function renderGameLog() {
-            const h = JSON.parse(localStorage.getItem('eagleStatsV4') || '[]');
+            const h = JSON.parse(localStorage.getItem('eagleStatsFinal_v5') || '[]');
             const area = document.getElementById('gameLogArea');
             if(h.length === 0) return area.innerHTML = `<div class="text-center py-20 text-gray-600 uppercase text-xs tracking-widest">No games logged</div>`;
-            area.innerHTML = h.map((g, idx) => `<div class="bg-black border border-gray-800 rounded-xl overflow-hidden shadow-lg"><div class="bg-gray-900 p-4 flex justify-between items-center"><div><span class="text-[9px] text-gray-500 font-bold block uppercase">${g.date}</span><span class="text-xl font-black italic uppercase">vs ${g.opp}</span></div><button onclick="document.getElementById('box-${idx}').classList.toggle('hidden')" class="text-gold uppercase text-[10px] font-bold border border-gold/30 px-3 py-1 rounded">Box Score</button></div><div id="box-${idx}" class="hidden p-4 bg-gray-950"><table class="w-full text-[10px] text-left"><tr class="text-gray-600 uppercase font-bold border-b border-gray-900"><th class="p-2">Player</th><th>PTS</th><th>OREB</th><th>REB</th><th>AST</th><th>TO</th></tr>${g.stats.map(s => `<tr class="border-b border-gray-900/50"><td class="p-2 font-bold text-gray-300">${s.name}</td><td class="text-white font-bold">${s.pts}</td><td>${s.oreb}</td><td>${s.treb}</td><td>${s.ast}</td><td>${s.to}</td></tr>`).join('')}</table></div></div>`).join('');
+            area.innerHTML = h.map((g, idx) => `<div class="bg-black border border-gray-800 rounded-xl overflow-hidden shadow-lg"><div class="bg-gray-900 p-4 flex justify-between items-center"><div><span class="text-[9px] text-gray-500 font-bold block uppercase">${g.date}</span><span class="text-xl font-black italic uppercase">vs ${g.opp}</span></div><button onclick="document.getElementById('box-${idx}').classList.toggle('hidden')" class="text-gold uppercase text-[10px] font-bold border border-gold/30 px-3 py-1 rounded">Box Score</button></div><div id="box-${idx}" class="hidden p-4 bg-gray-950"><table class="w-full text-[10px] text-left"><tr class="text-gray-600 uppercase font-bold border-b border-gray-900"><th class="p-2">Player</th><th>PTS</th><th>REB</th><th>AST</th><th>TO</th></tr>${g.stats.map(s => `<tr class="border-b border-gray-900/50"><td class="p-2 font-bold text-gray-300">${s.name}</td><td class="text-white font-bold">${s.pts}</td><td>${s.reb}</td><td>${s.ast}</td><td>${s.to}</td></tr>`).join('')}</table></div></div>`).join('');
         }
 
         function renderPlayerProfile() {
-            const h = JSON.parse(localStorage.getItem('eagleStatsV4') || '[]');
+            const h = JSON.parse(localStorage.getItem('eagleStatsFinal_v5') || '[]');
             const name = document.getElementById('profilePicker').value;
             const area = document.getElementById('playerProfileArea');
             if(!name) return area.innerHTML = "";
-            let stats = { gp:0, pts:0, oreb:0, ast:0, trend:[] };
-            h.forEach(g => { const s = g.stats.find(p => p.name === name); if(s) { stats.gp++; stats.pts += s.pts; stats.oreb += s.oreb; stats.ast += s.ast; stats.trend.push({ o: g.opp, v: s.pts }); } });
-            area.innerHTML = `<div class="grid grid-cols-1 lg:grid-cols-3 gap-8"><div class="bg-black border border-gold p-8 rounded-3xl text-center"><h2 class="text-3xl font-black uppercase text-gold mb-4">${name}</h2><div class="grid grid-cols-2 gap-4"><div class="p-2 border border-gray-800 rounded"><div class="text-[9px] text-gray-500 uppercase">PPG</div><div class="text-2xl font-black">${stats.gp > 0 ? (stats.pts/stats.gp).toFixed(1) : 0}</div></div><div class="p-2 border border-gray-800 rounded"><div class="text-[9px] text-gray-500 uppercase">ORPG</div><div class="text-2xl font-black">${stats.gp > 0 ? (stats.oreb/stats.gp).toFixed(1) : 0}</div></div></div></div><div class="lg:col-span-2 bg-black border border-gray-800 p-8 rounded-3xl"><div class="h-64"><canvas id="profileTrendChart"></canvas></div></div></div>`;
+            let stats = { gp:0, pts:0, reb:0, ast:0, trend:[] };
+            h.forEach(g => { const s = g.stats.find(p => p.name === name); if(s) { stats.gp++; stats.pts += s.pts; stats.reb += s.reb; stats.ast += s.ast; stats.trend.push({ o: g.opp, v: s.pts }); } });
+            area.innerHTML = `<div class="grid grid-cols-1 lg:grid-cols-3 gap-8"><div class="bg-black border border-gold p-8 rounded-3xl text-center"><h2 class="text-3xl font-black uppercase text-gold mb-4">${name}</h2><div class="grid grid-cols-2 gap-4"><div class="p-2 border border-gray-800 rounded"><div class="text-[9px] text-gray-500 uppercase">PPG</div><div class="text-2xl font-black">${stats.gp > 0 ? (stats.pts/stats.gp).toFixed(1) : 0}</div></div><div class="p-2 border border-gray-800 rounded"><div class="text-[9px] text-gray-500 uppercase">RPG</div><div class="text-2xl font-black">${stats.gp > 0 ? (stats.reb/stats.gp).toFixed(1) : 0}</div></div></div></div><div class="lg:col-span-2 bg-black border border-gray-800 p-8 rounded-3xl"><div class="h-64"><canvas id="profileTrendChart"></canvas></div></div></div>`;
             if(profileChart) profileChart.destroy();
             profileChart = new Chart(document.getElementById('profileTrendChart'), { type: 'bar', data: { labels: stats.trend.map(t => t.o), datasets: [{ label: 'Points', data: stats.trend.map(t => t.v), backgroundColor: '#FFB81C' }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#222' } } } } });
         }
 
         function runSearch() {
-            const h = JSON.parse(localStorage.getItem('eagleStatsV4') || '[]');
+            const h = JSON.parse(localStorage.getItem('eagleStatsFinal_v5') || '[]');
             const p = document.getElementById('recordPlayer').value;
             const s = document.getElementById('recordStat').value;
             const area = document.getElementById('recordResults');
-            let results = [];
-            h.forEach(g => g.stats.forEach(st => { if(p === 'all' || st.name === p) results.push({ d: g.date, o: g.opp, n: st.name, v: st[s] }); }));
-            results.sort((a,b) => b.v - a.v);
-            area.innerHTML = results.slice(0, 10).map(r => `<div class="bg-gray-900 p-3 rounded flex justify-between items-center border-l-4 border-gold"><div><span class="text-[9px] text-gray-500 uppercase">${r.d} vs ${r.o}</span><div class="font-black italic uppercase">${r.n}</div></div><div class="text-2xl font-black">${r.v}</div></div>`).join('');
+            let res = [];
+            h.forEach(g => g.stats.forEach(st => { if(p === 'all' || st.name === p) res.push({ d: g.date, o: g.opp, n: st.name, v: st[s] }); }));
+            res.sort((a,b) => b.v - a.v);
+            area.innerHTML = res.slice(0, 10).map(r => `<div class="bg-gray-900 p-3 rounded flex justify-between items-center border-l-4 border-gold"><div><span class="text-[9px] text-gray-500 uppercase">${r.d} vs ${r.o}</span><div class="font-black italic uppercase">${r.n}</div></div><div class="text-2xl font-black">${r.v}</div></div>`).join('');
         }
 
         function handleImport(input) {
@@ -385,27 +368,26 @@
                 const text = e.target.result; const rows = text.replace(/\r/g, '').split('\n').filter(r => r.trim() !== "");
                 const headers = rows[0].toLowerCase().split(',').map(h => h.trim());
                 const gamesMap = {};
-                const map = { 'date':'date', 'opponent':'opp', 'player':'name', '2pm':'fg2m', '2pa':'fg2a', '3pm':'fg3m', '3pa':'fg3a', 'ftm':'ftm', 'fta':'fta', 'oreb':'oreb', 'dreb':'dreb', 'ast':'ast', 'stl':'stl', 'to':'to' };
+                const map = { 'date':'date', 'opponent':'opp', 'player':'name', '2pm':'fg2m', '2pa':'fg2a', '3pm':'fg3m', '3pa':'fg3a', 'ftm':'ftm', 'fta':'fta', 'reb':'reb', 'ast':'ast', 'stl':'stl', 'to':'to' };
                 for (let i = 1; i < rows.length; i++) {
                     const data = rows[i].split(',').map(d => d.trim()); const entry = {}; headers.forEach((h, idx) => { if (map[h]) entry[map[h]] = data[idx]; });
                     const key = `${entry.date}_${entry.opp}`; if (!gamesMap[key]) gamesMap[key] = { date: entry.date, opp: entry.opp, stats: [] };
-                    const ps = { name: entry.name, fg2m: parseInt(entry.fg2m)||0, fg2a: parseInt(entry.fg2a)||0, fg3m: parseInt(entry.fg3m)||0, fg3a: parseInt(entry.fg3a)||0, ftm: parseInt(entry.ftm)||0, fta: parseInt(entry.fta)||0, oreb: parseInt(entry.oreb)||0, dreb: parseInt(entry.dreb)||0, ast: parseInt(entry.ast)||0, stl: parseInt(entry.stl)||0, to: parseInt(entry.to)||0 };
-                    ps.pts = (ps.fg2m*2)+(ps.fg3m*3)+ps.ftm; ps.treb = ps.oreb + ps.dreb;
-                    gamesMap[key].stats.push(ps);
+                    const ps = { name: entry.name, fg2m: parseInt(entry.fg2m)||0, fg2a: parseInt(entry.fg2a)||0, fg3m: parseInt(entry.fg3m)||0, fg3a: parseInt(entry.fg3a)||0, ftm: parseInt(entry.ftm)||0, fta: parseInt(entry.fta)||0, reb: parseInt(entry.reb)||0, ast: parseInt(entry.ast)||0, stl: parseInt(entry.stl)||0, to: parseInt(entry.to)||0 };
+                    ps.pts = (ps.fg2m*2)+(ps.fg3m*3)+ps.ftm; gamesMap[key].stats.push(ps);
                 }
-                const h = JSON.parse(localStorage.getItem('eagleStatsV4') || '[]'); Object.values(gamesMap).forEach(g => h.push(g));
-                localStorage.setItem('eagleStatsV4', JSON.stringify(h)); alert("Import complete!"); location.reload();
+                const h = JSON.parse(localStorage.getItem('eagleStatsFinal_v5') || '[]'); Object.values(gamesMap).forEach(g => h.push(g));
+                localStorage.setItem('eagleStatsFinal_v5', JSON.stringify(h)); alert("Import complete!"); location.reload();
             }; reader.readAsText(file);
         }
 
         function exportToCSV() {
-            const h = JSON.parse(localStorage.getItem('eagleStatsV4') || '[]');
-            let c = "Date,Opponent,Player,2PM,2PA,3PM,3PA,FTM,FTA,OREB,DREB,AST,STL,TO,PTS\n";
-            h.forEach(g => g.stats.forEach(s => c += `${g.date},${g.opp},${s.name},${s.fg2m},${s.fg2a},${s.fg3m},${s.fg3a},${s.ftm},${s.fta},${s.oreb},${s.dreb},${s.ast},${s.stl},${s.to},${s.pts}\n`));
-            const b = new Blob([c], {type:'text/csv'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'Eagles_Stats_V4.csv'; a.click();
+            const h = JSON.parse(localStorage.getItem('eagleStatsFinal_v5') || '[]');
+            let c = "Date,Opponent,Player,2PM,2PA,3PM,3PA,FTM,FTA,REB,AST,STL,TO,PTS\n";
+            h.forEach(g => g.stats.forEach(s => c += `${g.date},${g.opp},${s.name},${s.fg2m},${s.fg2a},${s.fg3m},${s.fg3a},${s.ftm},${s.fta},${s.reb},${s.ast},${s.stl},${s.to},${s.pts}\n`));
+            const b = new Blob([c], {type:'text/csv'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'Eagles_Stats_V5.csv'; a.click();
         }
 
-        function clearData() { if(confirm("Coach, reset everything?")) { localStorage.removeItem('eagleStatsV4'); location.reload(); } }
+        function clearData() { if(confirm("Coach, reset everything?")) { localStorage.removeItem('eagleStatsFinal_v5'); location.reload(); } }
     </script>
 </body>
 </html>
