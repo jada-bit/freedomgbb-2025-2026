@@ -195,7 +195,7 @@
                 <div id="editModalBody" class="overflow-y-auto flex-1"></div>
                 <div class="p-6 bg-gray-900 border-t border-gray-800 flex justify-end gap-4 rounded-b-3xl">
                     <button onclick="closeEditModal()" class="px-6 py-3 font-bold uppercase text-xs text-gray-400">Cancel</button>
-                    <button id="saveEditBtn" class="bg-gold text-black px-8 py-3 rounded-xl font-black uppercase text-sm">Save Changes</button>
+                    <button id="saveEditBtn" class="bg-gold text-black px-8 py-3 rounded-xl font-black uppercase text-sm shadow-xl">Save Changes</button>
                 </div>
             </div>
         </div>
@@ -213,7 +213,7 @@
         ];
 
         const STAT_FIELDS = ['fg2m','fg2a','fg3m','fg3a','ftm','fta','reb','ast','stl','to','fouls'];
-        const STORAGE_KEY = 'eagle_hoops_v17_final';
+        const STORAGE_KEY = 'eagle_hoops_v18_totalpts';
 
         let profileChart = null;
         let currentGameEditIndex = null;
@@ -289,7 +289,7 @@
             latest.windexWinners.forEach(n => { const s = latest.stats.find(p=>p.name===n); cit.push(`<div class="award-sentence"><span class="text-gold font-black">${n}</span> earned the <span class="text-white font-bold underline">Windex Bottle</span> for cleaning the glass with ${s.reb} rebounds.</div>`); });
             if(latest.hustleWinner) cit.push(`<div class="award-sentence"><span class="text-gold font-black">${latest.hustleWinner}</span> earned the <span class="text-white font-bold underline">Hustle Award</span> for elite energy.</div>`);
             if(latest.gritWinner) cit.push(`<div class="award-sentence"><span class="text-gold font-black">${latest.gritWinner}</span> earned the <span class="text-white font-bold underline">Grit Award</span> for determination.</div>`);
-            document.getElementById('narrativeAwardsArea').innerHTML = cit.join('') || '<div class="text-gray-600">No awards recorded.</div>';
+            document.getElementById('narrativeAwardsArea').innerHTML = cit.join('') || '<div class="text-gray-600 italic">No awards for this game.</div>';
 
             const pT = {}; ROSTER.forEach(p => pT[p.name] = { a:0, t:0, r:0, gp:0 });
             let tAst = 0, tFgm = 0, tFta = 0, tFga = 0;
@@ -339,7 +339,7 @@
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const name = document.getElementById('profilePicker').value;
             const area = document.getElementById('playerProfileArea');
-            if(!name) { area.innerHTML = `<div class="text-center py-10 text-gray-600 uppercase text-xs">Select an Eagle...</div>`; return; }
+            if(!name) { area.innerHTML = `<div class="text-center py-10 text-gray-600 uppercase text-xs">Select an Eagle above to view her scouting report</div>`; return; }
 
             const s = { 
                 gp:0, pts:0, reb:0, ast:0, to:0, stl:0, ftm:0, fta:0, fg2m:0, fg2a:0, fg3m:0, fg3a:0,
@@ -356,10 +356,12 @@
                     s.gp++; s.pts += p.pts; s.reb += p.reb; s.ast += p.ast; s.to += p.to; s.stl += p.stl;
                     s.ftm += p.ftm; s.fta += p.fta; s.fg2m += p.fg2m; s.fg2a += p.fg2a; s.fg3m += p.fg3m; s.fg3a += p.fg3a;
                     s.pos = p.pos;
+
                     checkH('pts', p.pts, g); checkH('reb', p.reb, g); checkH('ast', p.ast, g); checkH('stl', p.stl, g); checkH('to', p.to, g);
                     checkH('fgm', p.fg2m + p.fg3m, g); checkH('fga', p.fg2a + p.fg3a, g);
                     checkH('fg3m', p.fg3m, g); checkH('fg3a', p.fg3a, g);
                     checkH('ftm', p.ftm, g); checkH('fta', p.fta, g);
+
                     if(g.hardHatWinners?.includes(name)) s.awards.push({t:'Hard Hat', i:'👷', d:g.date, o:g.opp});
                     if(g.windexWinners?.includes(name)) s.awards.push({t:'Windex Bottle', i:'🧽', d:g.date, o:g.opp});
                     if(g.hustleWinner === name) s.awards.push({t:'Hustle Award', i:'⚡', d:g.date, o:g.opp});
@@ -368,18 +370,34 @@
                 }
             });
 
+            if(s.gp === 0) { area.innerHTML = `<div class="text-center py-20 text-gray-600">No data found for this player.</div>`; return; }
+
             const pct = (m, a) => a > 0 ? ((m/a)*100).toFixed(1) + '%' : '0.0%';
             area.innerHTML = `
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
                     <div class="lg:col-span-1 bg-black border border-gold p-6 rounded-3xl text-center shadow-2xl">
                         <div class="text-gold text-[10px] font-black uppercase mb-1">${s.pos} | Eagles Varsity</div>
                         <h2 class="text-2xl font-black uppercase text-white mb-4">${name}</h2>
-                        <div class="grid grid-cols-2 gap-2"><div class="bg-gray-950 p-2 rounded border border-gray-800"><div class="text-[8px] text-gray-500 uppercase font-bold">PPG</div><div class="text-lg font-black">${(s.pts/s.gp).toFixed(1)}</div></div><div class="bg-gray-950 p-2 rounded border border-gray-800"><div class="text-[8px] text-gray-500 uppercase font-bold">RPG</div><div class="text-lg font-black">${(s.reb/s.gp).toFixed(1)}</div></div></div>
+                        <div class="grid grid-cols-3 gap-1">
+                            <div class="bg-gray-950 p-2 rounded border border-gray-900">
+                                <div class="text-[7px] text-gray-500 uppercase font-bold">Total</div>
+                                <div class="text-base font-black text-gold">${s.pts}</div>
+                            </div>
+                            <div class="bg-gray-950 p-2 rounded border border-gray-900">
+                                <div class="text-[7px] text-gray-500 uppercase font-bold">PPG</div>
+                                <div class="text-base font-black text-white">${(s.pts/s.gp).toFixed(1)}</div>
+                            </div>
+                            <div class="bg-gray-950 p-2 rounded border border-gray-900">
+                                <div class="text-[7px] text-gray-500 uppercase font-bold">RPG</div>
+                                <div class="text-base font-black text-white">${(s.reb/s.gp).toFixed(1)}</div>
+                            </div>
+                        </div>
                     </div>
                     <div class="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
-                        ${[{l:'Hard Hats',v:s.awards.filter(x=>x.t==='Hard Hat').length},{l:'Windex',v:s.awards.filter(x=>x.t==='Windex Bottle').length},{l:'Energy',v:s.awards.filter(x=>x.t==='Hustle Award').length},{l:'Grit',v:s.awards.filter(x=>x.t==='Grit Award').length}].map(x => `<div class="profile-stat-box"><div class="text-[8px] text-gray-500 uppercase font-bold mb-1">${x.l}</div><div class="text-3xl font-black text-white">${x.v}</div></div>`).join('')}
+                        ${[{l:'Season Hard Hats',v:s.awards.filter(x=>x.t==='Hard Hat').length},{l:'Season Windex',v:s.awards.filter(x=>x.t==='Windex Bottle').length},{l:'Season Energy',v:s.awards.filter(x=>x.t==='Hustle Award').length},{l:'Season Grit',v:s.awards.filter(x=>x.t==='Grit Award').length}].map(x => `<div class="profile-stat-box"><div class="text-[8px] text-gray-500 uppercase font-bold mb-1">${x.l}</div><div class="text-3xl font-black text-white">${x.v}</div></div>`).join('')}
                     </div>
                 </div>
+                
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="bg-black border border-gray-800 p-6 rounded-3xl">
                         <h3 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Efficiency Metrics</h3>
@@ -390,17 +408,25 @@
                             <div class="flex justify-between p-2 rounded border border-gray-900 bg-gray-950"><span>AST:TO Ratio</span><span class="font-black text-white">${(s.ast/s.to || 0).toFixed(1)}</span></div>
                         </div>
                     </div>
+
                     <div class="lg:col-span-2 bg-black border border-gray-800 p-6 rounded-3xl">
                         <h3 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Season High Water Marks</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                            ${Object.entries(s.highs).map(([k, d]) => `<div class="bg-gray-950 border border-gray-900 p-2 rounded text-center"><div class="text-[7px] uppercase font-bold text-gray-500 mb-1">${k.toUpperCase()}</div><div class="text-lg font-black text-white">${d.v}</div><div class="high-context">${d.g || '-'}</div></div>`).join('')}
+                        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                            ${Object.entries(s.highs).map(([key, data]) => `
+                                <div class="bg-gray-950 border border-gray-900 p-2 rounded text-center">
+                                    <div class="text-[7px] uppercase font-bold text-gray-500 mb-1">${key.toUpperCase()}</div>
+                                    <div class="text-lg font-black text-white">${data.v}</div>
+                                    <div class="high-context">${data.g || '-'}</div>
+                                </div>`).join('')}
                         </div>
                     </div>
                 </div>
+
                 <div class="bg-black border border-gray-800 p-6 rounded-3xl h-64"><h3 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Individual Scoring Trend</h3><canvas id="profileTrendChart"></canvas></div>`;
             
             if(profileChart) profileChart.destroy();
-            profileChart = new Chart(document.getElementById('profileTrendChart'), { type: 'line', data: { labels: s.trend.map(t => t.o), datasets: [{ label: 'Points', data: s.trend.map(t => t.v), borderColor: '#FFB81C', backgroundColor: 'rgba(255,184,28,0.1)', fill: true, tension: 0.4 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#222' } }, x: { grid: { display: false }, ticks: { font: { size: 8 } } } } } });
+            const ctx = document.getElementById('profileTrendChart').getContext('2d');
+            profileChart = new Chart(ctx, { type: 'line', data: { labels: s.trend.map(t => t.o), datasets: [{ label: 'Points', data: s.trend.map(t => t.v), borderColor: '#FFB81C', backgroundColor: 'rgba(255,184,28,0.1)', fill: true, tension: 0.4 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#222' } }, x: { grid: { display: false }, ticks: { color: '#666', font: { size: 8 } } } } } });
         }
 
         window.openEditStats = function(idx) {
@@ -440,7 +466,7 @@
                         const data = rows[i].split(',').map(d => d.trim()); const entry = {}; headers.forEach((h, idx) => { if (map[h]) entry[map[h]] = data[idx]; });
                         const key = `${entry.date}_${entry.opp}`; if (!gM[key]) gM[key] = { date: entry.date, opp: entry.opp, oppScore: parseInt(entry.oppScore)||0, stats: [] };
                         const ps = { name: entry.name, fg2m: parseInt(entry.fg2m)||0, fg2a: parseInt(entry.fg2a)||0, fg3m: parseInt(entry.fg3m)||0, fg3a: parseInt(entry.fg3a)||0, ftm: parseInt(entry.ftm)||0, fta: parseInt(entry.fta)||0, reb: parseInt(entry.reb)||0, ast: parseInt(entry.ast)||0, stl: parseInt(entry.stl)||0, to: parseInt(entry.to)||0 };
-                        const rP = ROSTER.find(r=>r.name===ps.name); ps.pos = rP ? rP.pos : "G"; ps.pts = (ps.fg2m*2)+(ps.fg3m*3)+ps.ftm; gM[key].stats.push(ps);
+                        const rP = ROSTER.find(r=>r.name===ps.name); ps.pos = rP ? rP.pos : "G"; ps.pts = (ps.fg2m*2)+(ps.fg3m*3)+ps.ftm; ps.hardHatScore = (ps.reb+ps.stl+ps.ast)-ps.to; gM[key].stats.push(ps);
                     }
                     const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
                     Object.values(gM).forEach(g => { g.teamScore = g.stats.reduce((a,c)=>a+c.pts,0); g.result = g.teamScore > g.oppScore ? 'W' : (g.teamScore < g.oppScore ? 'L' : 'T'); const winz = calculateAwardWinners(g.stats, 'auto', 'auto'); g.windexWinners = winz.windex; g.hardHatWinners = winz.hardHat; h.push(g); });
