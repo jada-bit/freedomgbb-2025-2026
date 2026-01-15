@@ -62,13 +62,13 @@
                     <button onclick="toggleView('summary')" id="nav-summary" class="nav-btn inactive-nav">Season Stats</button>
                     <button onclick="toggleView('log')" id="nav-log" class="nav-btn inactive-nav">Game Log</button>
                     <button onclick="toggleView('profiles')" id="nav-profiles" class="nav-btn inactive-nav">Profiles</button>
+                    <button onclick="toggleView('settings')" id="nav-settings" class="nav-btn inactive-nav">Settings</button>
                 </nav>
             </div>
         </header>
 
         <!-- GAME ENTRY -->
         <main id="view-entry" class="p-4 md:p-8 animate-fadeIn">
-            <!-- Game Info -->
             <div class="bg-black border border-gray-800 rounded-2xl shadow-2xl overflow-hidden mb-8">
                 <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-900 border-b border-gray-800">
                     <div class="space-y-1">
@@ -85,7 +85,6 @@
                     </div>
                 </div>
 
-                <!-- Box Score Table -->
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
                         <thead>
@@ -104,21 +103,17 @@
                 </div>
             </div>
 
-            <!-- TACTICAL ENTRY (NEW) -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Set Play Tracker -->
                 <div class="bg-black border border-gray-800 rounded-2xl p-6 shadow-xl">
                     <h3 class="text-lg font-black uppercase italic mb-4 text-gold">Offensive Set Tracker</h3>
                     <div id="setPlayInputs" class="space-y-3">
                         <div class="grid grid-cols-5 gap-2 text-[8px] uppercase font-bold text-gray-500 px-2">
                             <div class="col-span-2">Play Name</div><div>Run</div><div>Scored</div><div>Pts</div>
                         </div>
-                        <!-- Inputs added via JS -->
                     </div>
-                    <button onclick="addSetPlayInput()" class="mt-4 text-[10px] uppercase font-black bg-gray-900 border border-gray-700 px-4 py-2 rounded-lg hover:bg-gray-800 transition-all">+ Add Another Play</button>
+                    <button onclick="addSetPlayInput()" class="mt-4 text-[10px] uppercase font-black bg-gray-900 border border-gray-700 px-4 py-2 rounded-lg hover:bg-gold hover:text-black transition-all">+ Add Another Play</button>
                 </div>
 
-                <!-- Shot Chart Logger -->
                 <div class="bg-black border border-gray-800 rounded-2xl p-6 shadow-xl text-center">
                     <h3 class="text-lg font-black uppercase italic mb-4 text-gold">Game Shot Map</h3>
                     <div class="flex flex-col md:flex-row gap-8 justify-center">
@@ -153,10 +148,9 @@
             </div>
         </main>
 
-        <!-- TACTICS VIEW (NEW) -->
+        <!-- TACTICS VIEW -->
         <main id="view-tactics" class="hidden p-4 md:p-8 space-y-8 animate-fadeIn">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Play Efficiency Table -->
                 <div class="lg:col-span-2 bg-black border border-gray-800 rounded-2xl p-6 shadow-xl">
                     <h2 class="text-xl font-black text-gold uppercase italic mb-6">Season Set Play Efficiency</h2>
                     <div class="overflow-x-auto">
@@ -168,13 +162,9 @@
                         </table>
                     </div>
                 </div>
-
-                <!-- Aggregated Shot Chart -->
                 <div class="bg-black border border-gray-800 rounded-2xl p-6 shadow-xl text-center">
                     <h2 class="text-xl font-black text-gold uppercase italic mb-6">Season Scoring Heatmap</h2>
-                    <div class="court-container mb-4" id="seasonHeatMap">
-                        <!-- Heat zones rendered via JS -->
-                    </div>
+                    <div class="court-container mb-4" id="seasonHeatMap"></div>
                     <p class="text-[10px] text-gray-500 uppercase font-bold italic">Darker Zone = Higher Scoring Frequency</p>
                 </div>
             </div>
@@ -217,11 +207,31 @@
             <div class="bg-black border border-gray-800 p-8 rounded-3xl max-w-2xl mx-auto shadow-2xl text-center">
                 <h2 class="text-2xl font-black text-gold uppercase italic mb-8">System Admin</h2>
                 <div class="flex flex-wrap gap-4 justify-center mb-12">
-                    <button onclick="exportToCSV()" class="bg-gray-800 text-white px-8 py-4 rounded-xl font-black uppercase text-xs">Download Full Dataset (CSV)</button>
-                    <button onclick="clearData()" class="bg-red-900 text-white px-8 py-4 rounded-xl font-black uppercase text-xs">Purge Season Data</button>
+                    <button onclick="exportToCSV()" class="bg-gray-800 text-white px-8 py-4 rounded-xl font-black uppercase text-xs hover:bg-gray-700">Download Data (CSV)</button>
+                    <label class="bg-blue-900 text-white px-8 py-4 rounded-xl font-black uppercase text-xs cursor-pointer hover:bg-blue-800">
+                        Import CSV File
+                        <input type="file" class="hidden" onchange="handleImport(this)">
+                    </label>
+                    <button onclick="clearData()" class="bg-red-900 text-white px-8 py-4 rounded-xl font-black uppercase text-xs hover:bg-red-700">Purge Data</button>
                 </div>
+                <p class="text-[10px] text-gray-500 uppercase font-bold italic">Note: Use the "Download Data" button to backup your season before purging.</p>
             </div>
         </main>
+
+        <!-- EDIT MODAL -->
+        <div id="editModal" class="hidden fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-4">
+            <div class="bg-black border border-gray-800 w-full max-w-6xl rounded-3xl shadow-2xl flex flex-col max-h-[95vh]">
+                <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-gray-900 rounded-t-3xl">
+                    <h2 class="text-xl font-black text-gold uppercase italic" id="editModalTitle">Edit Game Data</h2>
+                    <button onclick="closeEditModal()" class="text-gray-500 hover:text-white text-2xl font-bold">&times;</button>
+                </div>
+                <div id="editModalBody" class="overflow-y-auto flex-1"></div>
+                <div class="p-6 bg-gray-900 border-t border-gray-800 flex justify-end gap-4 rounded-b-3xl">
+                    <button onclick="closeEditModal()" class="px-6 py-3 font-bold uppercase text-xs text-gray-400">Cancel</button>
+                    <button id="saveEditBtn" class="bg-gold text-black px-8 py-3 rounded-xl font-black uppercase text-sm">Save Changes</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -236,7 +246,7 @@
 
         const STAT_FIELDS = ['fg2m','fg2a','fg3m','fg3a','ftm','fta','reb','ast','stl','to','fouls'];
         const SHOT_ZONES = ['paint', 'ml', 'mr', '3l', '3r', '3t'];
-        const STORAGE_KEY = 'eagles_tactical_v18_final';
+        const STORAGE_KEY = 'eagles_tactical_v19_final';
 
         let profileChart = null;
 
@@ -247,7 +257,6 @@
                 const opt = document.createElement('option'); opt.value = p.name; opt.textContent = p.name;
                 document.getElementById('profilePicker').appendChild(opt);
             });
-            // Init 3 play inputs
             for(let i=0; i<3; i++) addSetPlayInput();
             document.getElementById('gameDate').valueAsDate = new Date();
         };
@@ -275,12 +284,8 @@
         function saveGame() {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const oppScore = parseInt(document.getElementById('oppScore').value) || 0;
-            const game = { 
-                date: document.getElementById('gameDate').value, opp: document.getElementById('opponent').value || 'TBD', oppScore: oppScore, 
-                stats: [], setPlays: [], shotMap: { eagles: {}, opp: {} } 
-            };
+            const game = { date: document.getElementById('gameDate').value, opp: document.getElementById('opponent').value || 'TBD', oppScore: oppScore, stats: [], setPlays: [], shotMap: { eagles: {}, opp: {} } };
             
-            // Box Score
             let teamPts = 0;
             ROSTER.forEach(p => {
                 const s = { name: p.name, id: p.id, pos: p.pos };
@@ -291,20 +296,13 @@
             game.teamScore = teamPts;
             game.result = teamPts > oppScore ? 'W' : (teamPts < oppScore ? 'L' : 'T');
 
-            // Set Plays
             document.querySelectorAll('#setPlayInputs > div').forEach(row => {
                 const name = row.querySelector('.set-name').value;
                 if(name) {
-                    game.setPlays.push({ 
-                        name: name, 
-                        run: parseInt(row.querySelector('.set-run').value)||0,
-                        scored: parseInt(row.querySelector('.set-scored').value)||0,
-                        pts: parseInt(row.querySelector('.set-pts').value)||0
-                    });
+                    game.setPlays.push({ name: name, run: parseInt(row.querySelector('.set-run').value)||0, scored: parseInt(row.querySelector('.set-scored').value)||0, pts: parseInt(row.querySelector('.set-pts').value)||0 });
                 }
             });
 
-            // Shot Map
             SHOT_ZONES.forEach(z => {
                 game.shotMap.eagles[z] = parseInt(document.querySelector(`input[data-team="eagles"][data-zone="${z}"]`).value)||0;
                 game.shotMap.opp[z] = parseInt(document.querySelector(`input[data-team="opp"][data-zone="${z}"]`).value)||0;
@@ -327,28 +325,16 @@
                 Object.entries(g.shotMap?.eagles || {}).forEach(([zone, val]) => heat[zone] += val);
             });
 
-            // Play Table
             const sortedPlays = Object.values(plays).sort((a,b) => (b.pts/b.run || 0) - (a.pts/a.run || 0));
             document.getElementById('playEfficiencyBody').innerHTML = sortedPlays.map(p => `
-                <tr class="border-b border-gray-900">
-                    <td class="p-4 font-bold text-gold">${p.name}</td>
-                    <td class="text-center">${p.run}</td>
-                    <td class="text-center">${p.scored}</td>
-                    <td class="text-center">${p.pts}</td>
-                    <td class="text-center font-black text-white">${(p.pts/p.run || 0).toFixed(2)}</td>
-                </tr>`).join('') || '<tr><td colspan="5" class="p-10 text-center text-gray-700">No tactical data logged.</td></tr>';
+                <tr class="border-b border-gray-900"><td class="p-4 font-bold text-gold">${p.name}</td><td class="text-center">${p.run}</td><td class="text-center">${p.scored}</td><td class="text-center">${p.pts}</td><td class="text-center font-black text-white">${(p.pts/p.run || 0).toFixed(2)}</td></tr>`).join('') || '<tr><td colspan="5" class="p-10 text-center text-gray-700">No tactical data logged.</td></tr>';
 
-            // Heat Map
             const maxVal = Math.max(...Object.values(heat)) || 1;
-            const court = document.getElementById('seasonHeatMap');
-            court.innerHTML = '';
+            const court = document.getElementById('seasonHeatMap'); court.innerHTML = '';
             Object.entries(heat).forEach(([zone, val]) => {
                 const opacity = (val / maxVal).toFixed(2);
                 const classMap = { paint: 'z-paint', ml:'z-mid-l', mr:'z-mid-r', '3l':'z-3-l', '3r':'z-3-r', '3t':'z-3-t' };
-                court.innerHTML += `<div class="court-zone ${classMap[zone]}" style="background: rgba(255, 184, 28, ${opacity})">
-                    <span class="text-[10px] font-black text-black">${val}</span>
-                    <span class="text-[6px] uppercase font-bold text-black/50">${zone}</span>
-                </div>`;
+                court.innerHTML += `<div class="court-zone ${classMap[zone]}" style="background: rgba(255, 184, 28, ${opacity})"><span class="text-[10px] font-black text-black">${val}</span></div>`;
             });
         }
 
@@ -361,11 +347,10 @@
 
             document.getElementById('teamOverviewGrid').innerHTML = `
                 <div class="bg-black border border-gold p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Record</div><div class="text-2xl font-black text-gold">${wins}-${h.length-wins}</div></div>
-                <div class="bg-black border border-gray-800 p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Season PPG</div><div class="text-2xl font-black italic">${(tPts/h.length).toFixed(1)}</div></div>
+                <div class="bg-black border border-gray-800 p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Season PPG</div><div class="text-2xl font-black italic text-white">${(tPts/h.length).toFixed(1)}</div></div>
                 <div class="bg-black border border-gray-800 p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Opponent PPG</div><div class="text-2xl font-black italic text-red-500">${(tOpp/h.length).toFixed(1)}</div></div>
                 <div class="bg-black border border-gray-800 p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Last Margin</div><div class="text-2xl font-black ${latest.teamScore > latest.oppScore ? 'text-green-500' : 'text-red-500'}">${latest.teamScore - latest.oppScore}</div></div>`;
 
-            // Highs and Philo logic
             const pT = {}; ROSTER.forEach(p => pT[p.name] = { a:0, t:0, r:0, gp:0 });
             let tAst = 0, tFgm = 0;
             h.forEach(g => g.stats.forEach(s => { pT[s.name].gp++; pT[s.name].a += s.ast; pT[s.name].t += s.to; pT[s.name].r += s.reb; tAst += s.ast; tFgm += (s.fg2m + s.fg3m); }));
@@ -403,7 +388,7 @@
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const name = document.getElementById('profilePicker').value;
             const area = document.getElementById('playerProfileArea');
-            if(!name) { area.innerHTML = `<div class="text-center py-10 text-gray-600">Select a player.</div>`; return; }
+            if(!name) { area.innerHTML = `<div class="text-center py-10 text-gray-600 uppercase text-xs">Select a player.</div>`; return; }
 
             const s = { gp:0, pts:0, reb:0, ast:0, to:0, stl:0, ftm:0, fta:0, fg2m:0, fg2a:0, fg3m:0, fg3a:0, highs: { fgm: {v:0,g:""}, fga: {v:0,g:""}, fg3m: {v:0,g:""}, fg3a: {v:0,g:""}, ftm: {v:0,g:""}, fta: {v:0,g:""}, reb: {v:0,g:""}, ast: {v:0,g:""}, stl: {v:0,g:""}, to: {v:0,g:""}, pts: {v:0,g:""} }, trend:[], pos:"" };
             const sortedGames = [...h].sort((a,b) => new Date(a.date) - new Date(b.date));
@@ -437,8 +422,7 @@
                 </div>`;
             
             if(profileChart) profileChart.destroy();
-            const ctx = document.getElementById('profileTrendChart').getContext('2d');
-            profileChart = new Chart(ctx, { type: 'line', data: { labels: s.trend.map(t => t.o), datasets: [{ label: 'Points', data: s.trend.map(t => t.v), borderColor: '#FFB81C', backgroundColor: 'rgba(255,184,28,0.1)', fill: true, tension: 0.4 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#222' } }, x: { grid: { display: false }, ticks: { color: '#666', font: { size: 8 } } } } } });
+            profileChart = new Chart(document.getElementById('profileTrendChart').getContext('2d'), { type: 'line', data: { labels: s.trend.map(t => t.o), datasets: [{ label: 'Points', data: s.trend.map(t => t.v), borderColor: '#FFB81C', backgroundColor: 'rgba(255,184,28,0.1)', fill: true, tension: 0.4 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#222' } }, x: { grid: { display: false }, ticks: { font: { size: 8 } } } } } });
         }
 
         window.openEditStats = function(idx) {
@@ -456,11 +440,34 @@
         };
         function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
         function clearData() { if(confirm("Coach, wipe all data?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
+
+        function handleImport(input) {
+            const file = input.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const text = e.target.result; const rows = text.replace(/\r/g, '').split('\n').filter(r => r.trim() !== "");
+                    const headers = rows[0].toLowerCase().split(',').map(h => h.trim());
+                    const gM = {};
+                    const map = { 'date':'date', 'opponent':'opp', 'oppscore':'oppScore', 'player':'name', '2pm':'fg2m', '2pa':'fg2a', '3pm':'fg3m', '3pa':'fg3a', 'ftm':'ftm', 'fta':'fta', 'reb':'reb', 'ast':'ast', 'stl':'stl', 'to':'to' };
+                    for (let i = 1; i < rows.length; i++) {
+                        const data = rows[i].split(',').map(d => d.trim()); const entry = {}; headers.forEach((h, idx) => { if (map[h]) entry[map[h]] = data[idx]; });
+                        const key = `${entry.date}_${entry.opp}`; 
+                        if (!gM[key]) gM[key] = { date: entry.date, opp: entry.opp, oppScore: parseInt(entry.oppScore)||0, stats: [], setPlays: [], shotMap: { eagles: {}, opp: {} } };
+                        const ps = { name: entry.name, fg2m: parseInt(entry.fg2m)||0, fg2a: parseInt(entry.fg2a)||0, fg3m: parseInt(entry.fg3m)||0, fg3a: parseInt(entry.fg3a)||0, ftm: parseInt(entry.ftm)||0, fta: parseInt(entry.fta)||0, reb: parseInt(entry.reb)||0, ast: parseInt(entry.ast)||0, stl: parseInt(entry.stl)||0, to: parseInt(entry.to)||0 };
+                        const rP = ROSTER.find(r=>r.name===ps.name); ps.pos = rP ? rP.pos : "G"; ps.pts = (ps.fg2m*2)+(ps.fg3m*3)+ps.ftm; gM[key].stats.push(ps);
+                    }
+                    const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+                    Object.values(gM).forEach(g => { g.teamScore = g.stats.reduce((a,c)=>a+c.pts,0); g.result = g.teamScore > g.oppScore ? 'W' : (g.teamScore < g.oppScore ? 'L' : 'T'); h.push(g); });
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(h)); alert("Import complete!"); location.reload();
+                } catch (err) { alert("Error importing CSV."); }
+            }; reader.readAsText(file);
+        }
         function exportToCSV() {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             let c = "Date,Opponent,OppScore,Player,2PM,2PA,3PM,3PA,FTM,FTA,REB,AST,STL,TO,PTS\n";
             h.forEach(g => g.stats.forEach(s => c += `${g.date},${g.opp},${g.oppScore},${s.name},${s.fg2m},${s.fg2a},${s.fg3m},${s.fg3a},${s.ftm},${s.fta},${s.reb},${s.ast},${s.stl},${s.to},${s.pts}\n`));
-            const b = new Blob([c], {type:'text/csv'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'Eagles_Tactical_Stats.csv'; a.click();
+            const b = new Blob([c], {type:'text/csv'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'Eagles_Basketball_Data.csv'; a.click();
         }
     </script>
 </body>
