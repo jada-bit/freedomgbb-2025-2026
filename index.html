@@ -22,6 +22,7 @@
         .high-stat { color: #10b981; font-weight: 900; } 
         .low-stat { color: #ef4444; font-weight: 900; }
         .clipboard-card { background: #0a0a0a; border: 1px solid #222; border-top: 4px solid var(--eagle-gold); }
+        .profile-stat-box { background: #111; border: 1px solid #222; padding: 1rem; border-radius: 0.75rem; text-align: center; }
     </style>
 </head>
 <body class="bg-gray-950 text-white font-sans min-h-screen">
@@ -109,7 +110,6 @@
                 </div>
             </div>
 
-            <!-- Honor Roll / Ties Integrated -->
             <div class="bg-black border border-gray-800 p-6 rounded-2xl">
                 <h3 class="text-lg font-black uppercase italic mb-6 border-b border-gray-800 pb-2">Season Record Holders (Individual Games)</h3>
                 <div id="honorRoll" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
@@ -130,20 +130,7 @@
             <div class="flex justify-center mb-6">
                 <select id="profilePicker" onchange="renderPlayerProfile()" class="bg-gray-900 border-2 border-gold p-4 rounded-xl text-gold font-black uppercase text-lg outline-none max-w-sm w-full"><option value="">Select an Eagle</option></select>
             </div>
-            <div id="playerProfileArea"></div>
-        </main>
-
-        <!-- RECORDS (SEARCH) -->
-        <main id="view-records" class="hidden p-4 md:p-8 space-y-6">
-            <div class="bg-black border border-gray-800 p-8 rounded-3xl">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    <select id="recordPlayer" onchange="runSearch()" class="bg-gray-900 border border-gray-700 p-3 rounded-xl outline-none focus:border-gold"><option value="all">Entire Team</option></select>
-                    <select id="recordStat" onchange="runSearch()" class="bg-gray-900 border border-gray-700 p-3 rounded-xl outline-none focus:border-gold">
-                        <option value="pts">Points</option><option value="reb">Total Rebounds</option><option value="ast">Assists</option><option value="stl">Steals</option><option value="to">Turnovers</option>
-                    </select>
-                </div>
-                <div id="recordResults" class="space-y-2"></div>
-            </div>
+            <div id="playerProfileArea" class="space-y-8"></div>
         </main>
 
         <!-- SETTINGS -->
@@ -178,7 +165,6 @@
         window.onload = () => {
             const entryTable = document.getElementById('rosterRows');
             const profilePicker = document.getElementById('profilePicker');
-            const recordPlayer = document.getElementById('recordPlayer');
 
             ROSTER.forEach(p => {
                 entryTable.innerHTML += `<tr class="border-b border-gray-900">
@@ -189,13 +175,12 @@
                 </tr>`;
                 const opt = document.createElement('option'); opt.value = p.name; opt.textContent = `#${p.id} ${p.name}`;
                 profilePicker.appendChild(opt.cloneNode(true));
-                recordPlayer.appendChild(opt.cloneNode(true));
             });
             document.getElementById('gameDate').valueAsDate = new Date();
         };
 
         function toggleView(v) {
-            ['entry', 'summary', 'clipboard', 'log', 'profiles', 'records', 'settings'].forEach(view => {
+            ['entry', 'summary', 'clipboard', 'log', 'profiles', 'settings'].forEach(view => {
                 const el = document.getElementById('view-' + view);
                 if (el) el.classList.toggle('hidden', v !== view);
                 const btn = document.getElementById('nav-' + view);
@@ -240,7 +225,6 @@
                 });
             });
 
-            // 1. Ball Security
             const security = ROSTER.map(p => ({
                 name: p.name,
                 ratio: pTotals[p.name].to > 0 ? (pTotals[p.name].ast / pTotals[p.name].to).toFixed(1) : pTotals[p.name].ast
@@ -252,7 +236,6 @@
                     <span class="font-black ${p.ratio >= 2 ? 'text-green-500' : 'text-gold'}">${p.ratio}</span>
                 </div>`).join('');
 
-            // 2. Rebound Leaders
             const boards = ROSTER.map(p => ({
                 name: p.name,
                 avg: pTotals[p.name].gp > 0 ? (pTotals[p.name].reb / pTotals[p.name].gp).toFixed(1) : 0
@@ -264,7 +247,6 @@
                     <span class="font-black text-white">${p.avg}</span>
                 </div>`).join('');
 
-            // 3. Philosophy
             const astOnFgm = teamFgm > 0 ? (teamAst / teamFgm * 100).toFixed(0) : 0;
             const ftAggression = teamFga > 0 ? (teamFta / teamFga).toFixed(2) : 0;
 
@@ -281,7 +263,6 @@
                     <div class="text-xl font-black">${ftAggression} <span class="text-[10px] text-gray-600 font-normal ml-2 italic">Higher = Attacking rim more</span></div>
                 </div>`;
 
-            // 4. Record Holders (Ties Included)
             const findHighs = (key) => {
                 let max = Math.max(...allPerformances.map(o => o[key]));
                 return allPerformances.filter(o => o[key] === max && max > 0);
@@ -343,22 +324,120 @@
             const name = document.getElementById('profilePicker').value;
             const area = document.getElementById('playerProfileArea');
             if(!name) return area.innerHTML = "";
-            let stats = { gp:0, pts:0, reb:0, ast:0, trend:[] };
-            h.forEach(g => { const s = g.stats.find(p => p.name === name); if(s) { stats.gp++; stats.pts += s.pts; stats.reb += s.reb; stats.ast += s.ast; stats.trend.push({ o: g.opp, v: s.pts }); } });
-            area.innerHTML = `<div class="grid grid-cols-1 lg:grid-cols-3 gap-8"><div class="bg-black border border-gold p-8 rounded-3xl text-center"><h2 class="text-3xl font-black uppercase text-gold mb-4">${name}</h2><div class="grid grid-cols-2 gap-4"><div class="p-2 border border-gray-800 rounded"><div class="text-[9px] text-gray-500 uppercase">PPG</div><div class="text-2xl font-black">${stats.gp > 0 ? (stats.pts/stats.gp).toFixed(1) : 0}</div></div><div class="p-2 border border-gray-800 rounded"><div class="text-[9px] text-gray-500 uppercase">RPG</div><div class="text-2xl font-black">${stats.gp > 0 ? (stats.reb/stats.gp).toFixed(1) : 0}</div></div></div></div><div class="lg:col-span-2 bg-black border border-gray-800 p-8 rounded-3xl"><div class="h-64"><canvas id="profileTrendChart"></canvas></div></div></div>`;
-            if(profileChart) profileChart.destroy();
-            profileChart = new Chart(document.getElementById('profileTrendChart'), { type: 'bar', data: { labels: stats.trend.map(t => t.o), datasets: [{ label: 'Points', data: stats.trend.map(t => t.v), backgroundColor: '#FFB81C' }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#222' } } } } });
-        }
 
-        function runSearch() {
-            const h = JSON.parse(localStorage.getItem('eagleStatsFinal_v5') || '[]');
-            const p = document.getElementById('recordPlayer').value;
-            const s = document.getElementById('recordStat').value;
-            const area = document.getElementById('recordResults');
-            let res = [];
-            h.forEach(g => g.stats.forEach(st => { if(p === 'all' || st.name === p) res.push({ d: g.date, o: g.opp, n: st.name, v: st[s] }); }));
-            res.sort((a,b) => b.v - a.v);
-            area.innerHTML = res.slice(0, 10).map(r => `<div class="bg-gray-900 p-3 rounded flex justify-between items-center border-l-4 border-gold"><div><span class="text-[9px] text-gray-500 uppercase">${r.d} vs ${r.o}</span><div class="font-black italic uppercase">${r.n}</div></div><div class="text-2xl font-black">${r.v}</div></div>`).join('');
+            let stats = { 
+                gp:0, pts:0, reb:0, ast:0, to:0, stl:0,
+                fg2m:0, fg2a:0, fg3m:0, fg3a:0, ftm:0, fta:0,
+                h_pts:0, l_pts:Infinity, h_reb:0, l_reb:Infinity,
+                trend:[] 
+            };
+
+            h.forEach(g => { 
+                const s = g.stats.find(p => p.name === name); 
+                if(s) { 
+                    stats.gp++; 
+                    stats.pts += s.pts; stats.reb += s.reb; stats.ast += s.ast; 
+                    stats.to += s.to; stats.stl += s.stl;
+                    stats.fg2m += s.fg2m; stats.fg2a += s.fg2a;
+                    stats.fg3m += s.fg3m; stats.fg3a += s.fg3a;
+                    stats.ftm += s.ftm; stats.fta += s.fta;
+                    if(s.pts > stats.h_pts) stats.h_pts = s.pts;
+                    if(s.pts < stats.l_pts) stats.l_pts = s.pts;
+                    if(s.reb > stats.h_reb) stats.h_reb = s.reb;
+                    if(s.reb < stats.l_reb) stats.l_reb = s.reb;
+                    stats.trend.push({ o: g.opp, v: s.pts }); 
+                } 
+            });
+
+            const pct = (m, a) => a > 0 ? ((m/a)*100).toFixed(1) + '%' : '0.0%';
+            const ratio = stats.to > 0 ? (stats.ast / stats.to).toFixed(2) : stats.ast.toFixed(2);
+            const aggression = (stats.fg2a + stats.fg3a) > 0 ? (stats.fta / (stats.fg2a + stats.fg3a)).toFixed(2) : '0.00';
+
+            area.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                    <!-- Main Card -->
+                    <div class="lg:col-span-1 bg-black border border-gold p-6 rounded-3xl text-center shadow-2xl">
+                        <div class="w-20 h-20 bg-gold rounded-full mx-auto mb-4 flex items-center justify-center text-black font-black text-3xl">🦅</div>
+                        <h2 class="text-2xl font-black uppercase text-gold leading-none mb-1">${name}</h2>
+                        <p class="text-xs text-gray-500 uppercase font-bold tracking-widest mb-4">Player Profile</p>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="bg-gray-950 p-3 rounded-xl border border-gray-900">
+                                <div class="text-[9px] text-gray-500 uppercase font-bold">PPG</div>
+                                <div class="text-xl font-black">${(stats.pts/stats.gp).toFixed(1)}</div>
+                            </div>
+                            <div class="bg-gray-950 p-3 rounded-xl border border-gray-900">
+                                <div class="text-[9px] text-gray-500 uppercase font-bold">RPG</div>
+                                <div class="text-xl font-black">${(stats.reb/stats.gp).toFixed(1)}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shooting Splits -->
+                    <div class="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="profile-stat-box">
+                            <div class="text-[10px] text-gray-500 uppercase font-bold mb-1">2PT Percentage</div>
+                            <div class="text-2xl font-black text-white">${pct(stats.fg2m, stats.fg2a)}</div>
+                            <div class="text-[9px] text-gray-600 mt-1">${stats.fg2m}/${stats.fg2a} Made</div>
+                        </div>
+                        <div class="profile-stat-box">
+                            <div class="text-[10px] text-gold uppercase font-bold mb-1">3PT Percentage</div>
+                            <div class="text-2xl font-black text-gold">${pct(stats.fg3m, stats.fg3a)}</div>
+                            <div class="text-[9px] text-gray-600 mt-1">${stats.fg3m}/${stats.fg3a} Made</div>
+                        </div>
+                        <div class="profile-stat-box">
+                            <div class="text-[10px] text-gray-500 uppercase font-bold mb-1">FT Percentage</div>
+                            <div class="text-2xl font-black text-white">${pct(stats.ftm, stats.fta)}</div>
+                            <div class="text-[9px] text-gray-600 mt-1">${stats.ftm}/${stats.fta} Made</div>
+                        </div>
+                        <div class="profile-stat-box">
+                            <div class="text-[10px] text-gray-500 uppercase font-bold mb-1">AST:TO Ratio</div>
+                            <div class="text-2xl font-black ${ratio >= 2 ? 'text-green-500' : 'text-white'}">${ratio}</div>
+                            <div class="text-[9px] text-gray-600 mt-1">${stats.ast} Ast / ${stats.to} TO</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Highs and Lows Table -->
+                    <div class="bg-black border border-gray-800 p-6 rounded-3xl">
+                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Season Range (Highs / Lows)</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center p-3 bg-gray-950 rounded-xl border border-gray-900">
+                                <span class="text-sm font-bold">Points Range</span>
+                                <span class="font-black text-lg"><span class="text-green-500">${stats.h_pts}</span> <span class="text-gray-700">/</span> <span class="text-red-500">${stats.l_pts}</span></span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-gray-950 rounded-xl border border-gray-900">
+                                <span class="text-sm font-bold">Rebounds Range</span>
+                                <span class="font-black text-lg"><span class="text-green-500">${stats.h_reb}</span> <span class="text-gray-700">/</span> <span class="text-red-500">${stats.l_reb}</span></span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-gray-950 rounded-xl border border-gray-900">
+                                <span class="text-sm font-bold">Individual Aggression</span>
+                                <span class="font-black text-lg text-gold">${aggression}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Individual Trend Chart -->
+                    <div class="bg-black border border-gray-800 p-6 rounded-3xl">
+                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Scoring Trend</h3>
+                        <div class="h-48"><canvas id="profileTrendChart"></canvas></div>
+                    </div>
+                </div>`;
+
+            if(profileChart) profileChart.destroy();
+            profileChart = new Chart(document.getElementById('profileTrendChart'), { 
+                type: 'bar', 
+                data: { 
+                    labels: stats.trend.map(t => t.o), 
+                    datasets: [{ label: 'Points', data: stats.trend.map(t => t.v), backgroundColor: '#FFB81C', borderRadius: 6 }] 
+                }, 
+                options: { 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } }, 
+                    scales: { y: { beginAtZero: true, grid: { color: '#222' } }, x: { grid: { display: false } } } 
+                } 
+            });
         }
 
         function handleImport(input) {
