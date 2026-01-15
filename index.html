@@ -12,32 +12,43 @@
         .text-gold { color: var(--eagle-gold); }
         .border-gold { border-color: var(--eagle-gold); }
         input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        
         .stat-input { width: 45px; background: #111; border: 1px solid #333; border-radius: 4px; padding: 4px; text-align: center; color: white; font-size: 0.8rem; }
         .stat-input:focus { border-color: var(--eagle-gold); outline: none; background: #222; }
+        
         .sticky-col { position: sticky; left: 0; background-color: #000; z-index: 10; border-right: 2px solid #333; }
+        
         .nav-btn { font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 8px 16px; border-radius: 9999px; transition: all 0.2s; white-space: nowrap; }
         .active-nav { background-color: var(--eagle-gold); color: black; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .inactive-nav { color: #9ca3af; }
         .inactive-nav:hover { color: white; }
+        
         .clipboard-card { background: #0a0a0a; border: 1px solid #222; border-top: 4px solid var(--eagle-gold); }
         .profile-stat-box { background: #111; border: 1px solid #222; padding: 1rem; border-radius: 0.75rem; text-align: center; }
         .modal-overlay { background: rgba(0,0,0,0.9); backdrop-filter: blur(4px); }
         .high-context { font-size: 7.5px; text-transform: uppercase; color: #6b7280; margin-top: 4px; line-height: 1.2; }
         
-        /* Tactical Styles */
-        .court-container { position: relative; width: 100%; max-width: 400px; aspect-ratio: 15/14; background: #111; border: 2px solid #333; border-radius: 12px; margin: 0 auto; }
-        .court-zone { position: absolute; border: 1px dashed rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
-        .court-zone:hover { background: rgba(255, 184, 28, 0.1); }
-        .zone-label { font-size: 8px; font-weight: 900; color: #555; pointer-events: none; }
-        .zone-input { width: 30px; font-size: 10px; background: black; border: 1px solid #444; color: white; text-align: center; border-radius: 3px; margin-top: 2px; }
+        /* Tactical Styles - Made Larger */
+        .court-container { position: relative; width: 100%; max-width: 550px; aspect-ratio: 15/14; background: #111; border: 2px solid #333; border-radius: 16px; margin: 0 auto; box-shadow: inset 0 0 40px rgba(0,0,0,0.5); }
+        .court-zone { position: absolute; border: 1px dashed rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.2s; border-radius: 4px; }
+        .court-zone:hover { border-color: var(--eagle-gold); background: rgba(255, 184, 28, 0.05); }
+        
+        .zone-label { font-size: 9px; font-weight: 900; color: #444; text-transform: uppercase; margin-bottom: 2px; }
+        .zone-input-group { display: flex; gap: 4px; align-items: center; }
+        .zone-input { width: 34px; font-size: 11px; background: black; border: 1px solid #444; color: white; text-align: center; border-radius: 4px; padding: 2px 0; font-weight: bold; }
+        .zone-input:focus { border-color: var(--eagle-gold); outline: none; }
+        .zone-slash { font-size: 10px; color: #666; font-weight: bold; }
         
         /* Zone Placements */
-        .z-paint { top: 40%; left: 30%; width: 40%; height: 55%; }
-        .z-mid-l { top: 40%; left: 5%; width: 25%; height: 55%; }
-        .z-mid-r { top: 40%; right: 5%; width: 25%; height: 55%; }
-        .z-3-l { top: 5%; left: 5%; width: 25%; height: 35%; }
-        .z-3-r { top: 5%; right: 5%; width: 25%; height: 35%; }
-        .z-3-t { top: 5%; left: 30%; width: 40%; height: 35%; }
+        .z-paint { top: 35%; left: 25%; width: 50%; height: 60%; }
+        .z-mid-l { top: 35%; left: 2%; width: 21%; height: 60%; }
+        .z-mid-r { top: 35%; right: 2%; width: 21%; height: 60%; }
+        .z-3-l { top: 2%; left: 2%; width: 21%; height: 31%; }
+        .z-3-r { top: 2%; right: 2%; width: 21%; height: 31%; }
+        .z-3-t { top: 2%; left: 25%; width: 50%; height: 31%; }
+
+        .filter-select { background: #111; border: 1px solid #333; font-size: 10px; color: #9ca3af; padding: 6px 12px; border-radius: 8px; outline: none; }
+        .filter-select:focus { border-color: var(--eagle-gold); color: white; }
     </style>
 </head>
 <body class="bg-gray-950 text-white font-sans min-h-screen">
@@ -103,40 +114,46 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="bg-black border border-gray-800 rounded-2xl p-6 shadow-xl">
-                    <h3 class="text-lg font-black uppercase italic mb-4 text-gold">Offensive Set Tracker</h3>
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                <!-- Set Play Tracker -->
+                <div class="bg-black border border-gray-800 rounded-2xl p-8 shadow-xl">
+                    <h3 class="text-xl font-black uppercase italic mb-2 text-gold">Offensive Set Tracker</h3>
+                    <p class="text-[10px] text-gray-500 mb-6 uppercase font-bold tracking-tight">Efficiency: Scored / Possessions</p>
                     <div id="setPlayInputs" class="space-y-3">
                         <div class="grid grid-cols-5 gap-2 text-[8px] uppercase font-bold text-gray-500 px-2">
-                            <div class="col-span-2">Play Name</div><div>Run</div><div>Scored</div><div>Pts</div>
+                            <div class="col-span-2">Play Name</div><div>POSS</div><div>SCORED</div><div>PTS</div>
                         </div>
                     </div>
-                    <button onclick="addSetPlayInput()" class="mt-4 text-[10px] uppercase font-black bg-gray-900 border border-gray-700 px-4 py-2 rounded-lg hover:bg-gold hover:text-black transition-all">+ Add Another Play</button>
+                    <button onclick="addSetPlayInput()" class="mt-6 text-[10px] uppercase font-black bg-gray-900 border border-gray-800 text-gold px-6 py-3 rounded-xl hover:bg-gold hover:text-black transition-all">+ New Set Play</button>
                 </div>
 
-                <div class="bg-black border border-gray-800 rounded-2xl p-6 shadow-xl text-center">
-                    <h3 class="text-lg font-black uppercase italic mb-4 text-gold">Game Shot Map</h3>
+                <!-- Shot Chart Logger -->
+                <div class="bg-black border border-gray-800 rounded-2xl p-8 shadow-xl text-center">
+                    <h3 class="text-xl font-black uppercase italic mb-2 text-gold">Shot Charts</h3>
+                    <p class="text-[10px] text-gray-500 mb-6 uppercase font-bold tracking-tight">Format: (M) Makes / (A) Attempts</p>
                     <div class="flex flex-col md:flex-row gap-8 justify-center">
-                        <div>
-                            <p class="text-[9px] font-bold uppercase text-gray-500 mb-2">Eagles Makes</p>
+                        <!-- Eagles -->
+                        <div class="flex-1">
+                            <p class="text-[10px] font-black uppercase text-white mb-3">Eagles Field Goals</p>
                             <div class="court-container" id="eaglesShotMap">
-                                <div class="court-zone z-paint" data-zone="paint"><span class="zone-label">Paint</span><input type="number" class="zone-input" data-team="eagles" data-zone="paint" value="0"></div>
-                                <div class="court-zone z-3-l" data-zone="3l"><span class="zone-label">3 L Corner</span><input type="number" class="zone-input" data-team="eagles" data-zone="3l" value="0"></div>
-                                <div class="court-zone z-3-r" data-zone="3r"><span class="zone-label">3 R Corner</span><input type="number" class="zone-input" data-team="eagles" data-zone="3r" value="0"></div>
-                                <div class="court-zone z-3-t" data-zone="3t"><span class="zone-label">3 Top</span><input type="number" class="zone-input" data-team="eagles" data-zone="3t" value="0"></div>
-                                <div class="court-zone z-mid-l" data-zone="ml"><span class="zone-label">Mid L</span><input type="number" class="zone-input" data-team="eagles" data-zone="ml" value="0"></div>
-                                <div class="court-zone z-mid-r" data-zone="mr"><span class="zone-label">Mid R</span><input type="number" class="zone-input" data-team="eagles" data-zone="mr" value="0"></div>
+                                <div class="court-zone z-paint"><span class="zone-label">Paint</span><div class="zone-input-group"><input type="number" class="zone-input" data-team="eagles" data-zone="paint" data-type="m" value="0"><span class="zone-slash">/</span><input type="number" class="zone-input" data-team="eagles" data-zone="paint" data-type="a" value="0"></div></div>
+                                <div class="court-zone z-3-l"><span class="zone-label">3L</span><div class="zone-input-group"><input type="number" class="zone-input" data-team="eagles" data-zone="3l" data-type="m" value="0"><span class="zone-slash">/</span><input type="number" class="zone-input" data-team="eagles" data-zone="3l" data-type="a" value="0"></div></div>
+                                <div class="court-zone z-3-r"><span class="zone-label">3R</span><div class="zone-input-group"><input type="number" class="zone-input" data-team="eagles" data-zone="3r" data-type="m" value="0"><span class="zone-slash">/</span><input type="number" class="zone-input" data-team="eagles" data-zone="3r" data-type="a" value="0"></div></div>
+                                <div class="court-zone z-3-t"><span class="zone-label">3 Top</span><div class="zone-input-group"><input type="number" class="zone-input" data-team="eagles" data-zone="3t" data-type="m" value="0"><span class="zone-slash">/</span><input type="number" class="zone-input" data-team="eagles" data-zone="3t" data-type="a" value="0"></div></div>
+                                <div class="court-zone z-mid-l"><span class="zone-label">Mid L</span><div class="zone-input-group"><input type="number" class="zone-input" data-team="eagles" data-zone="ml" data-type="m" value="0"><span class="zone-slash">/</span><input type="number" class="zone-input" data-team="eagles" data-zone="ml" data-type="a" value="0"></div></div>
+                                <div class="court-zone z-mid-r"><span class="zone-label">Mid R</span><div class="zone-input-group"><input type="number" class="zone-input" data-team="eagles" data-zone="mr" data-type="m" value="0"><span class="zone-slash">/</span><input type="number" class="zone-input" data-team="eagles" data-zone="mr" data-type="a" value="0"></div></div>
                             </div>
                         </div>
-                        <div>
-                            <p class="text-[9px] font-bold uppercase text-gray-500 mb-2">Opponent Makes</p>
-                            <div class="court-container border-red-900/50" id="oppShotMap">
-                                <div class="court-zone z-paint" data-zone="paint"><span class="zone-label">Paint</span><input type="number" class="zone-input" data-team="opp" data-zone="paint" value="0"></div>
-                                <div class="court-zone z-3-l" data-zone="3l"><span class="zone-label">3 L Corner</span><input type="number" class="zone-input" data-team="opp" data-zone="3l" value="0"></div>
-                                <div class="court-zone z-3-r" data-zone="3r"><span class="zone-label">3 R Corner</span><input type="number" class="zone-input" data-team="opp" data-zone="3r" value="0"></div>
-                                <div class="court-zone z-3-t" data-zone="3t"><span class="zone-label">3 Top</span><input type="number" class="zone-input" data-team="opp" data-zone="3t" value="0"></div>
-                                <div class="court-zone z-mid-l" data-zone="ml"><span class="zone-label">Mid L</span><input type="number" class="zone-input" data-team="opp" data-zone="ml" value="0"></div>
-                                <div class="court-zone z-mid-r" data-zone="mr"><span class="zone-label">Mid R</span><input type="number" class="zone-input" data-team="opp" data-zone="mr" value="0"></div>
+                        <!-- Opponent -->
+                        <div class="flex-1">
+                            <p class="text-[10px] font-black uppercase text-red-500 mb-3">Opponent Field Goals</p>
+                            <div class="court-container border-red-900/40" id="oppShotMap">
+                                <div class="court-zone z-paint"><span class="zone-label">Paint</span><div class="zone-input-group"><input type="number" class="zone-input" data-team="opp" data-zone="paint" data-type="m" value="0"><span class="zone-slash">/</span><input type="number" class="zone-input" data-team="opp" data-zone="paint" data-type="a" value="0"></div></div>
+                                <div class="court-zone z-3-l"><span class="zone-label">3L</span><div class="zone-input-group"><input type="number" class="zone-input" data-team="opp" data-zone="3l" data-type="m" value="0"><span class="zone-slash">/</span><input type="number" class="zone-input" data-team="opp" data-zone="3l" data-type="a" value="0"></div></div>
+                                <div class="court-zone z-3-r"><span class="zone-label">3R</span><div class="zone-input-group"><input type="number" class="zone-input" data-team="opp" data-zone="3r" data-type="m" value="0"><span class="zone-slash">/</span><input type="number" class="zone-input" data-team="opp" data-zone="3r" data-type="a" value="0"></div></div>
+                                <div class="court-zone z-3-t"><span class="zone-label">3 Top</span><div class="zone-input-group"><input type="number" class="zone-input" data-team="opp" data-zone="3t" data-type="m" value="0"><span class="zone-slash">/</span><input type="number" class="zone-input" data-team="opp" data-zone="3t" data-type="a" value="0"></div></div>
+                                <div class="court-zone z-mid-l"><span class="zone-label">Mid L</span><div class="zone-input-group"><input type="number" class="zone-input" data-team="opp" data-zone="ml" data-type="m" value="0"><span class="zone-slash">/</span><input type="number" class="zone-input" data-team="opp" data-zone="ml" data-type="a" value="0"></div></div>
+                                <div class="court-zone z-mid-r"><span class="zone-label">Mid R</span><div class="zone-input-group"><input type="number" class="zone-input" data-team="opp" data-zone="mr" data-type="m" value="0"><span class="zone-slash">/</span><input type="number" class="zone-input" data-team="opp" data-zone="mr" data-type="a" value="0"></div></div>
                             </div>
                         </div>
                     </div>
@@ -144,28 +161,35 @@
             </div>
 
             <div class="mt-8 text-right">
-                <button onclick="saveGame()" class="bg-gold text-black px-16 py-6 rounded-2xl font-black text-2xl uppercase shadow-2xl hover:scale-[1.03] transition-transform">Finalize Game Record</button>
+                <button onclick="saveGame()" class="bg-gold text-black px-16 py-6 rounded-2xl font-black text-2xl uppercase shadow-2xl hover:scale-[1.03] transition-transform">Finalize Game Stats</button>
             </div>
         </main>
 
         <!-- TACTICS VIEW -->
         <main id="view-tactics" class="hidden p-4 md:p-8 space-y-8 animate-fadeIn">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-2 bg-black border border-gray-800 rounded-2xl p-6 shadow-xl">
-                    <h2 class="text-xl font-black text-gold uppercase italic mb-6">Season Set Play Efficiency</h2>
+                <div class="lg:col-span-2 bg-black border border-gray-800 rounded-2xl p-8 shadow-xl">
+                    <h2 class="text-2xl font-black text-gold uppercase italic mb-8 underline decoration-4 underline-offset-8">Set Play Efficiency</h2>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs">
                             <thead class="bg-gray-950 text-gray-500 uppercase font-black tracking-tighter">
-                                <tr><th class="p-4">Play Name</th><th class="text-center">Times Run</th><th class="text-center">Times Scored</th><th class="text-center">Total Pts</th><th class="text-center">Efficiency (PPP)</th></tr>
+                                <tr><th class="p-4">Play Name</th><th class="text-center">Possessions</th><th class="text-center">Success Rate</th><th class="text-center">Total Pts</th><th class="text-center">PPP</th></tr>
                             </thead>
                             <tbody id="playEfficiencyBody"></tbody>
                         </table>
                     </div>
                 </div>
-                <div class="bg-black border border-gray-800 rounded-2xl p-6 shadow-xl text-center">
-                    <h2 class="text-xl font-black text-gold uppercase italic mb-6">Season Scoring Heatmap</h2>
-                    <div class="court-container mb-4" id="seasonHeatMap"></div>
-                    <p class="text-[10px] text-gray-500 uppercase font-bold italic">Darker Zone = Higher Scoring Frequency</p>
+                <div class="bg-black border border-gray-800 rounded-2xl p-8 shadow-xl text-center">
+                    <h2 class="text-2xl font-black text-gold uppercase italic mb-8">Season Shot Selection</h2>
+                    <div class="court-container mb-6" id="seasonHeatMap"></div>
+                    <div class="text-left bg-gray-950 p-6 rounded-2xl border border-gray-900 shadow-inner">
+                        <h4 class="text-[11px] font-black uppercase text-gold mb-3 tracking-widest border-b border-gray-800 pb-2">Legend & Definitions</h4>
+                        <div class="space-y-3">
+                            <div><span class="text-[10px] text-white font-black block">FG% (Percentage)</span><span class="text-[9px] text-gray-500 italic">Middle number represents efficiency in that zone.</span></div>
+                            <div><span class="text-[10px] text-white font-black block">M / A (Volume)</span><span class="text-[9px] text-gray-500 italic">Total makes vs total attempts for the season.</span></div>
+                            <div><span class="text-[10px] text-white font-black block">Color Intensity</span><span class="text-[9px] text-gray-500 italic">Brighter gold indicates higher frequency of shots.</span></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -174,7 +198,7 @@
         <main id="view-clipboard" class="hidden p-4 md:p-8 space-y-8 animate-fadeIn">
             <div id="teamOverviewGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="clipboard-card p-6 rounded-2xl"><h3 class="text-lg font-black uppercase italic mb-4 text-gold">Ball Movement Goals</h3><div id="teamPhilo" class="space-y-4"></div></div>
+                <div class="clipboard-card p-6 rounded-2xl"><h3 class="text-lg font-black uppercase italic mb-4 text-gold">Ball Movement</h3><div id="teamPhilo" class="space-y-4"></div></div>
                 <div class="clipboard-card p-6 rounded-2xl"><h3 class="text-lg font-black uppercase italic mb-1 text-white">Board Dominance</h3><p class="text-[10px] text-gray-500 uppercase mb-4">Season leaders</p><div id="reboundLeaders" class="space-y-2"></div></div>
                 <div class="clipboard-card p-6 rounded-2xl"><h3 class="text-lg font-black uppercase italic mb-4 text-gold">Season Records</h3><div id="honorRoll" class="space-y-4"></div></div>
             </div>
@@ -192,10 +216,8 @@
         <!-- GAME LOG -->
         <main id="view-log" class="hidden p-4 md:p-8 space-y-6 animate-fadeIn">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <h2 class="text-2xl font-black text-gold uppercase italic">Season Game History</h2>
-                <div class="flex gap-2 w-full md:w-auto">
-                    <input type="text" id="logSearch" onkeyup="renderGameLog()" placeholder="Search Opponent..." class="bg-gray-900 border border-gray-800 p-2 rounded text-xs text-white outline-none focus:border-gold flex-1 md:w-48">
-                </div>
+                <h2 class="text-2xl font-black text-gold uppercase italic">Game Log</h2>
+                <input type="text" id="logSearch" onkeyup="renderGameLog()" placeholder="Search Opponent..." class="bg-gray-900 border border-gray-800 p-2 rounded text-xs text-white outline-none focus:border-gold md:w-64">
             </div>
             <div id="gameLogArea" class="space-y-4"></div>
         </main>
@@ -214,11 +236,8 @@
                 <h2 class="text-2xl font-black text-gold uppercase italic mb-8">System Admin</h2>
                 <div class="flex flex-wrap gap-4 justify-center mb-12">
                     <button onclick="exportToCSV()" class="bg-gray-800 text-white px-8 py-4 rounded-xl font-black uppercase text-xs hover:bg-gray-700">Download Data (CSV)</button>
-                    <label class="bg-blue-900 text-white px-8 py-4 rounded-xl font-black uppercase text-xs cursor-pointer hover:bg-blue-800">
-                        Import CSV File
-                        <input type="file" class="hidden" onchange="handleImport(this)">
-                    </label>
-                    <button onclick="clearData()" class="bg-red-900 text-white px-8 py-4 rounded-xl font-black uppercase text-xs hover:bg-red-700">Purge Data</button>
+                    <label class="bg-blue-900 text-white px-8 py-4 rounded-xl font-black uppercase text-xs cursor-pointer hover:bg-blue-800">Import CSV File<input type="file" class="hidden" onchange="handleImport(this)"></label>
+                    <button onclick="clearData()" class="bg-red-900 text-white px-8 py-4 rounded-xl font-black uppercase text-xs hover:bg-red-700">Purge Season Data</button>
                 </div>
             </div>
         </main>
@@ -251,7 +270,7 @@
 
         const STAT_FIELDS = ['fg2m','fg2a','fg3m','fg3a','ftm','fta','reb','ast','stl','to','fouls'];
         const SHOT_ZONES = ['paint', 'ml', 'mr', '3l', '3r', '3t'];
-        const STORAGE_KEY = 'eagles_basketball_dashboard_v20';
+        const STORAGE_KEY = 'eagles_tactical_v22_final';
 
         let profileChart = null;
         let currentGameEditIndex = null;
@@ -269,8 +288,8 @@
 
         function addSetPlayInput(targetId = 'setPlayInputs', play = {name:'', run:0, scored:0, pts:0}) {
             const div = document.createElement('div');
-            div.className = "grid grid-cols-5 gap-2 items-center";
-            div.innerHTML = `<input type="text" placeholder="Play Name" value="${play.name}" class="col-span-2 bg-gray-900 border border-gray-800 p-2 rounded text-xs text-white set-name"><input type="number" placeholder="Run" value="${play.run}" class="bg-black border border-gray-800 p-2 rounded text-xs text-white set-run"><input type="number" placeholder="Scored" value="${play.scored}" class="bg-black border border-gray-800 p-2 rounded text-xs text-white set-scored"><input type="number" placeholder="Pts" value="${play.pts}" class="bg-black border border-gray-800 p-2 rounded text-xs text-white set-pts">`;
+            div.className = "grid grid-cols-5 gap-2 items-center mb-1";
+            div.innerHTML = `<input type="text" placeholder="Set Name" value="${play.name}" class="col-span-2 bg-gray-900 border border-gray-800 p-2 rounded text-xs text-white set-name"><input type="number" placeholder="Run" value="${play.run}" class="bg-black border border-gray-800 p-2 rounded text-xs text-white set-run"><input type="number" placeholder="Scored" value="${play.scored}" class="bg-black border border-gray-800 p-2 rounded text-xs text-white set-scored"><input type="number" placeholder="Pts" value="${play.pts}" class="bg-black border border-gray-800 p-2 rounded text-xs text-white set-pts">`;
             document.getElementById(targetId).appendChild(div);
         }
 
@@ -303,38 +322,50 @@
             game.result = teamPts > oppScore ? 'W' : (teamPts < oppScore ? 'L' : 'T');
 
             document.querySelectorAll('#setPlayInputs > div:not(.text-gray-500)').forEach(row => {
-                const name = row.querySelector('.set-name').value;
-                if(name) game.setPlays.push({ name: name, run: parseInt(row.querySelector('.set-run').value)||0, scored: parseInt(row.querySelector('.set-scored').value)||0, pts: parseInt(row.querySelector('.set-pts').value)||0 });
+                const nameInput = row.querySelector('.set-name');
+                if(nameInput && nameInput.value) {
+                    game.setPlays.push({ name: nameInput.value, run: parseInt(row.querySelector('.set-run').value)||0, scored: parseInt(row.querySelector('.set-scored').value)||0, pts: parseInt(row.querySelector('.set-pts').value)||0 });
+                }
             });
 
             SHOT_ZONES.forEach(z => {
-                game.shotMap.eagles[z] = parseInt(document.querySelector(`input[data-team="eagles"][data-zone="${z}"]`).value)||0;
-                game.shotMap.opp[z] = parseInt(document.querySelector(`input[data-team="opp"][data-zone="${z}"]`).value)||0;
+                game.shotMap.eagles[z] = { m: parseInt(document.querySelector(`input[data-team="eagles"][data-zone="${z}"][data-type="m"]`).value)||0, a: parseInt(document.querySelector(`input[data-team="eagles"][data-zone="${z}"][data-type="a"]`).value)||0 };
+                game.shotMap.opp[z] = { m: parseInt(document.querySelector(`input[data-team="opp"][data-zone="${z}"][data-type="m"]`).value)||0, a: parseInt(document.querySelector(`input[data-team="opp"][data-zone="${z}"][data-type="a"]`).value)||0 };
             });
 
             h.push(game); localStorage.setItem(STORAGE_KEY, JSON.stringify(h));
-            alert("Season Data Updated."); location.reload();
+            alert("Coach, Season Data Updated."); location.reload();
         }
 
         function renderTactics() {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const plays = {};
-            const heat = { paint:0, ml:0, mr:0, '3l':0, '3r':0, '3t':0 };
+            const heat = { paint:{m:0,a:0}, ml:{m:0,a:0}, mr:{m:0,a:0}, '3l':{m:0,a:0}, '3r':{m:0,a:0}, '3t':{m:0,a:0} };
+            
             h.forEach(g => {
                 g.setPlays?.forEach(p => {
                     if(!plays[p.name]) plays[p.name] = { name: p.name, run:0, scored:0, pts:0 };
                     plays[p.name].run += p.run; plays[p.name].scored += p.scored; plays[p.name].pts += p.pts;
                 });
-                Object.entries(g.shotMap?.eagles || {}).forEach(([zone, val]) => heat[zone] += val);
+                if(g.shotMap?.eagles) {
+                    Object.entries(g.shotMap.eagles).forEach(([zone, data]) => { if(heat[zone]) { heat[zone].m += (data.m||0); heat[zone].a += (data.a||0); } });
+                }
             });
+
             const sortedPlays = Object.values(plays).sort((a,b) => (b.pts/b.run || 0) - (a.pts/a.run || 0));
-            document.getElementById('playEfficiencyBody').innerHTML = sortedPlays.map(p => `<tr class="border-b border-gray-900"><td class="p-4 font-bold text-gold">${p.name}</td><td class="text-center">${p.run}</td><td class="text-center">${p.scored}</td><td class="text-center">${p.pts}</td><td class="text-center font-black text-white">${(p.pts/p.run || 0).toFixed(2)}</td></tr>`).join('') || '<tr><td colspan="5" class="p-10 text-center text-gray-700 uppercase text-[10px]">No tactical data.</td></tr>';
-            const maxVal = Math.max(...Object.values(heat)) || 1;
+            document.getElementById('playEfficiencyBody').innerHTML = sortedPlays.map(p => `<tr class="border-b border-gray-900"><td class="p-4 font-bold text-gold">${p.name}</td><td class="text-center">${p.run}</td><td class="text-center">${((p.scored/p.run)*100 || 0).toFixed(0)}%</td><td class="text-center">${p.pts}</td><td class="text-center font-black text-white">${(p.pts/p.run || 0).toFixed(2)}</td></tr>`).join('') || '<tr><td colspan="5" class="p-10 text-center text-gray-700 uppercase text-[10px]">No tactical data.</td></tr>';
+            
+            const maxAtts = Math.max(...Object.values(heat).map(v => v.a)) || 1;
             const court = document.getElementById('seasonHeatMap'); court.innerHTML = '';
             Object.entries(heat).forEach(([zone, val]) => {
-                const opacity = (val / maxVal).toFixed(2);
+                const opacity = (val.a / maxAtts).toFixed(2);
+                const pct = val.a > 0 ? ((val.m / val.a)*100).toFixed(0) : 0;
+                const labels = { paint: 'Paint', ml:'Mid L', mr:'Mid R', '3l':'3L', '3r':'3R', '3t':'3T' };
                 const classMap = { paint: 'z-paint', ml:'z-mid-l', mr:'z-mid-r', '3l':'z-3-l', '3r':'z-3-r', '3t':'z-3-t' };
-                court.innerHTML += `<div class="court-zone ${classMap[zone]}" style="background: rgba(255, 184, 28, ${opacity})"><span class="text-[10px] font-black text-black">${val}</span></div>`;
+                court.innerHTML += `<div class="court-zone ${classMap[zone]}" style="background: rgba(255, 184, 28, ${opacity})">
+                    <span class="text-[12px] font-black text-black">${pct}%</span>
+                    <span class="text-[7px] font-black text-black/50">${val.m}/${val.a}</span>
+                </div>`;
             });
         }
 
@@ -348,7 +379,7 @@
             let tAst = 0, tFgm = 0; h.forEach(g => g.stats.forEach(s => { pT[s.name].gp++; pT[s.name].a += s.ast; pT[s.name].t += s.to; pT[s.name].r += s.reb; tAst += s.ast; tFgm += (s.fg2m + s.fg3m); }));
             document.getElementById('reboundLeaders').innerHTML = ROSTER.map(p => ({ n: p.name, v: pT[p.name].gp > 0 ? (pT[p.name].r / pT[p.name].gp).toFixed(1) : 0 })).sort((a,b)=>b.v-a.v).slice(0,5).map(p => `<div class="flex justify-between p-2 rounded bg-gray-900 border border-gray-800"><span class="text-xs font-bold">${p.n}</span><span class="font-black text-white">${p.v}</span></div>`).join('');
             document.getElementById('teamPhilo').innerHTML = `<div class="space-y-4"><div class="flex justify-between text-[10px] font-bold text-gray-400"><span>AST on FG% (Goal: 65%)</span> <span>${(tAst/tFgm*100 || 0).toFixed(0)}%</span></div><div class="h-2 bg-gray-800 rounded-full overflow-hidden"><div class="h-full bg-gold" style="width: ${tFgm>0?(tAst/tFgm*100):0}%"></div></div></div>`;
-            const allP = []; h.forEach(g => g.stats.forEach(s => allP.push({ n: s.name, pts: s.pts, reb: s.reb, date: g.date })));
+            const allP = []; h.forEach(g => g.stats.forEach(s => allP.push({ n: s.name, pts: s.pts, reb: s.reb, date: g.date, opp: g.opp })));
             const findH = (k) => { let max = Math.max(...allP.map(o => o[k])); return allP.filter(o => o[k] === max && max > 0); };
             document.getElementById('honorRoll').innerHTML = [{t:'Points', k:'pts'}, {t:'Rebounds', k:'reb'}].map(s => `<div class="p-3 bg-gray-900 border border-gray-800 rounded-xl mb-2"><div class="text-[9px] text-gray-500 uppercase font-black mb-2">${s.t} Record</div>${findH(s.k).map(w => `<div class="flex justify-between items-baseline"><div><div class="text-sm font-black uppercase text-white">${w.n}</div><div class="text-[8px] text-gray-500 uppercase">${w.date}</div></div><div class="text-xl font-black text-gold">${w[s.k]}</div></div>`).join('')}</div>`).join('');
         }
@@ -359,7 +390,7 @@
             const pM = {}; ROSTER.forEach(r => pM[r.name] = { gp:0, pts:0, reb:0, ast:0, to:0, h:0, l:Infinity, pos:r.pos });
             h.forEach(g => g.stats.forEach(s => { const p = pM[s.name]; if (!p) return; p.gp++; p.pts += s.pts; p.reb += s.reb; p.ast += s.ast; p.to += s.to; if(s.pts > p.h) p.h = s.pts; if(s.pts < p.l) p.l = s.pts; }));
             let html = `<table class="w-full text-left text-[10px]"><thead class="bg-gray-950 text-gray-500 uppercase"><tr><th class="p-4">Player</th><th>POS</th><th>GP</th><th>PPG</th><th>RPG</th><th>APG</th><th>TOPG</th><th>H/L</th></tr></thead><tbody>`;
-            for(let n in pM) { const p = pM[n]; if(p.gp === 0) continue; if(posF !== 'all' && p.pos !== posF) continue; html += `<tr class="border-b border-gray-900"><td class="p-4 font-bold text-gold">${n}</td><td><span class="text-gray-600 font-black">${p.pos}</span></td><td>${p.gp}</td><td>${(p.pts/p.gp).toFixed(1)}</td><td>${(p.reb/p.gp).toFixed(1)}</td><td>${(p.ast/p.gp).toFixed(1)}</td><td>${(p.to/p.gp).toFixed(1)}</td><td><span class="text-green-500">${p.h}</span> / <span class="text-red-500">${p.l}</span></td></tr>`; }
+            for(let n in pM) { const p = pM[n]; if(p.gp === 0) continue; if(posF !== 'all' && p.pos !== posF) continue; html += `<tr class="border-b border-gray-900"><td class="p-4 font-bold text-gold">${n}</td><td><span class="text-gray-600 font-black">${p.pos}</span></td><td>${p.gp}</td><td>${(p.pts/p.gp).toFixed(1)}</td><td>${(p.reb/p.gp).toFixed(1)}</td><td>${(p.ast/p.gp).toFixed(1)}</td><td>${(p.to/p.gp).toFixed(1)}</td><td><span class="text-green-500">${p.h}</span> / <span class="text-red-500">${p.l===Infinity?0:p.l}</span></td></tr>`; }
             document.getElementById('summaryTableArea').innerHTML = html + `</tbody></table>`;
         }
 
@@ -367,16 +398,16 @@
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const search = document.getElementById('logSearch').value.toLowerCase();
             const area = document.getElementById('gameLogArea');
-            if(h.length === 0) return area.innerHTML = `<div class="text-center py-20 text-gray-600 uppercase text-xs tracking-widest">No entries found.</div>`;
+            if(h.length === 0) return area.innerHTML = `<div class="text-center py-20 text-gray-600 uppercase text-xs tracking-widest italic">No entries logged.</div>`;
             const filtered = h.filter(g => g.opp.toLowerCase().includes(search));
-            area.innerHTML = filtered.map((g, idx) => `<div class="bg-black border border-gray-800 rounded-xl overflow-hidden shadow-lg mb-4"><div class="bg-gray-900 p-4 flex justify-between items-center border-b border-gray-800"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded bg-gray-950 border border-gray-800 flex items-center justify-center font-black text-xl ${g.result==='W'?'text-gold':'text-red-600'}">${g.result||'?'}</div><div><span class="text-[9px] text-gray-500 font-bold block uppercase">${g.date}</span><span class="text-xl font-black italic uppercase">Eagles ${g.teamScore}, ${g.opp} ${g.oppScore||0}</span></div></div><button onclick="openEditStats(${h.indexOf(g)})" class="text-white uppercase text-[8px] font-bold bg-gray-800 px-3 py-1 rounded hover:bg-gold hover:text-black">Edit Data</button></div></div>`).join('');
+            area.innerHTML = filtered.map((g, idx) => `<div class="bg-black border border-gray-800 rounded-xl overflow-hidden shadow-lg mb-4"><div class="bg-gray-900 p-4 flex justify-between items-center border-b border-gray-800"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded bg-gray-950 border border-gray-800 flex items-center justify-center font-black text-xl ${g.result==='W'?'text-gold':'text-red-600'}">${g.result||'?'}</div><div><span class="text-[9px] text-gray-500 font-bold block uppercase">${g.date}</span><span class="text-xl font-black italic uppercase">Eagles ${g.teamScore}, ${g.opp} ${g.oppScore||0}</span></div></div><button onclick="openEditStats(${h.indexOf(g)})" class="text-white uppercase text-[8px] font-bold bg-gray-800 px-3 py-1 rounded">Edit</button></div></div>`).join('');
         }
 
         function renderPlayerProfile() {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const name = document.getElementById('profilePicker').value;
             const area = document.getElementById('playerProfileArea');
-            if(!name) { area.innerHTML = `<div class="text-center py-10 text-gray-600 uppercase text-xs uppercase font-bold italic">Select an Eagle above to view her stats</div>`; return; }
+            if(!name) { area.innerHTML = `<div class="text-center py-10 text-gray-600">Select a player...</div>`; return; }
             const s = { gp:0, pts:0, reb:0, ast:0, to:0, stl:0, ftm:0, fta:0, fg2m:0, fg2a:0, fg3m:0, fg3a:0, highs: { fgm: {v:0,g:""}, fga: {v:0,g:""}, fg3m: {v:0,g:""}, fg3a: {v:0,g:""}, ftm: {v:0,g:""}, fta: {v:0,g:""}, reb: {v:0,g:""}, ast: {v:0,g:""}, stl: {v:0,g:""}, to: {v:0,g:""}, pts: {v:0,g:""} }, trend:[], pos:"" };
             const sortedGames = [...h].sort((a,b) => new Date(a.date) - new Date(b.date));
             const checkH = (k, val, game) => { if(val >= s.highs[k].v) { s.highs[k].v = val; s.highs[k].g = `vs ${game.opp} (${game.date})`; } };
@@ -384,11 +415,11 @@
                 const p = g.stats.find(pl => pl.name === name);
                 if(p) { s.gp++; s.pts += p.pts; s.reb += p.reb; s.ast += p.ast; s.to += p.to; s.stl += p.stl; s.ftm += p.ftm; s.fta += p.fta; s.fg2m += p.fg2m; s.fg2a += p.fg2a; s.fg3m += p.fg3m; s.fg3a += p.fg3a; s.pos = p.pos; checkH('pts', p.pts, g); checkH('reb', p.reb, g); checkH('ast', p.ast, g); checkH('stl', p.stl, g); checkH('to', p.to, g); checkH('fgm', p.fg2m + p.fg3m, g); checkH('fga', p.fg2a + p.fg3a, g); checkH('fg3m', p.fg3m, g); checkH('fg3a', p.fg3a, g); checkH('ftm', p.ftm, g); checkH('fta', p.fta, g); s.trend.push({o: g.opp, v: p.pts}); }
             });
-            if(s.gp === 0) { area.innerHTML = `<div class="text-center py-20 text-gray-600">No data found.</div>`; return; }
             const pct = (m, a) => a > 0 ? ((m/a)*100).toFixed(1) + '%' : '0.0%';
-            area.innerHTML = `<div class="grid grid-cols-1 lg:grid-cols-4 gap-4"><div class="lg:col-span-1 bg-black border border-gold p-6 rounded-3xl text-center shadow-2xl"><div class="text-gold text-[10px] font-black uppercase mb-1">${s.pos} | Eagles Varsity</div><h2 class="text-2xl font-black uppercase text-white mb-4">${name}</h2><div class="grid grid-cols-3 gap-1"><div class="bg-gray-950 p-2 rounded border border-gray-800"><div class="text-[7px] uppercase font-bold text-gray-500">TOTAL</div><div class="text-base font-black text-gold">${s.pts}</div></div><div class="bg-gray-950 p-2 rounded border border-gray-800"><div class="text-[7px] uppercase font-bold text-gray-500">PPG</div><div class="text-base font-black text-white">${(s.pts/s.gp).toFixed(1)}</div></div><div class="bg-gray-950 p-2 rounded border border-gray-800"><div class="text-[7px] uppercase font-bold text-gray-500">RPG</div><div class="text-base font-black text-white">${(s.reb/s.gp).toFixed(1)}</div></div></div></div><div class="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">${[{l:'2PT%',v:pct(s.fg2m,s.fg2a)},{l:'3PT%',v:pct(s.fg3m,s.fg3a)},{l:'FT%',v:pct(s.ftm,s.fta)},{l:'AST:TO',v:(s.ast/s.to||0).toFixed(1)}].map(x => `<div class="profile-stat-box"><div class="text-[8px] uppercase font-bold text-gray-500 mb-1">${x.l}</div><div class="text-3xl font-black text-white">${x.v}</div></div>`).join('')}</div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div class="bg-black border border-gray-800 p-6 rounded-3xl"><h3 class="text-xs font-black uppercase tracking-widest text-gray-500 mb-4">Season Highs (Single Game)</h3><div class="grid grid-cols-2 md:grid-cols-5 gap-3">${Object.entries(s.highs).map(([k, d]) => `<div class="bg-gray-950 border border-gray-900 p-2 rounded text-center"><div class="text-[7px] uppercase font-bold text-gray-500 mb-1">${k.toUpperCase()}</div><div class="text-lg font-black text-white">${d.v}</div><div class="high-context">${d.g || '-'}</div></div>`).join('')}</div></div><div class="bg-black border border-gray-800 p-6 rounded-3xl h-64"><h3 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Scoring Trend</h3><canvas id="profileTrendChart"></canvas></div></div>`;
+            area.innerHTML = `<div class="grid grid-cols-1 lg:grid-cols-4 gap-4"><div class="lg:col-span-1 bg-black border border-gold p-6 rounded-3xl text-center shadow-2xl"><div class="text-gold text-[10px] font-black uppercase mb-1">${s.pos} | Eagles Varsity</div><h2 class="text-2xl font-black uppercase text-white mb-4">${name}</h2><div class="grid grid-cols-3 gap-1"><div class="bg-gray-950 p-2 rounded border border-gray-800"><div class="text-[7px] uppercase font-bold text-gray-500">TOTAL</div><div class="text-base font-black text-gold">${s.pts}</div></div><div class="bg-gray-950 p-2 rounded border border-gray-800"><div class="text-[7px] uppercase font-bold text-gray-500">PPG</div><div class="text-base font-black text-white">${(s.pts/s.gp||0).toFixed(1)}</div></div><div class="bg-gray-950 p-2 rounded border border-gray-800"><div class="text-[7px] uppercase font-bold text-gray-500">RPG</div><div class="text-base font-black text-white">${(s.reb/s.gp||0).toFixed(1)}</div></div></div></div><div class="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">${[{l:'2PT%',v:pct(s.fg2m,s.fg2a)},{l:'3PT%',v:pct(s.fg3m,s.fg3a)},{l:'FT%',v:pct(s.ftm,s.fta)},{l:'AST:TO',v:(s.ast/s.to||0).toFixed(1)}].map(x => `<div class="profile-stat-box"><div class="text-[8px] uppercase font-bold text-gray-500 mb-1">${x.l}</div><div class="text-3xl font-black text-white">${x.v}</div></div>`).join('')}</div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div class="bg-black border border-gray-800 p-6 rounded-3xl"><h3 class="text-xs font-black uppercase tracking-widest text-gray-500 mb-4">Season Highs (Single Game)</h3><div class="grid grid-cols-2 md:grid-cols-5 gap-3">${Object.entries(s.highs).map(([k, d]) => `<div class="bg-gray-950 border border-gray-900 p-2 rounded text-center"><div class="text-[7px] uppercase font-bold text-gray-500 mb-1">${k.toUpperCase()}</div><div class="text-lg font-black text-white">${d.v}</div><div class="high-context">${d.g || '-'}</div></div>`).join('')}</div></div><div class="bg-black border border-gray-800 p-6 rounded-3xl h-64"><h3 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Scoring Trend</h3><canvas id="profileTrendChart"></canvas></div></div>`;
             if(profileChart) profileChart.destroy();
-            profileChart = new Chart(document.getElementById('profileTrendChart').getContext('2d'), { type: 'line', data: { labels: s.trend.map(t => t.o), datasets: [{ label: 'Points', data: s.trend.map(t => t.v), borderColor: '#FFB81C', backgroundColor: 'rgba(255,184,28,0.1)', fill: true, tension: 0.4 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#222' } }, x: { grid: { display: false }, ticks: { font: { size: 8 } } } } } });
+            const ctx = document.getElementById('profileTrendChart').getContext('2d');
+            profileChart = new Chart(ctx, { type: 'line', data: { labels: s.trend.map(t => t.o), datasets: [{ label: 'Points', data: s.trend.map(t => t.v), borderColor: '#FFB81C', backgroundColor: 'rgba(255,184,28,0.1)', fill: true, tension: 0.4 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#222' } }, x: { grid: { display: false }, ticks: { font: { size: 8 }, color: '#444' } } } } });
         }
 
         window.openEditStats = function(idx) {
@@ -399,16 +430,12 @@
 
             let html = `
                 <div class="p-6 space-y-8">
-                    <!-- General Game Info -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-950 border border-gray-800 rounded-xl">
-                        <div><label class="text-[10px] text-gold font-bold uppercase">Date</label><input type="date" id="editDate" value="${g.date}" class="w-full bg-black border border-gray-700 p-2 rounded text-white text-xs"></div>
-                        <div><label class="text-[10px] text-gold font-bold uppercase">Opponent</label><input type="text" id="editOpp" value="${g.opp}" class="w-full bg-black border border-gray-700 p-2 rounded text-white text-xs"></div>
-                        <div><label class="text-[10px] text-red-500 font-bold uppercase">Opp Score</label><input type="number" id="editOppScore" value="${g.oppScore}" class="w-full bg-black border border-gray-700 p-2 rounded text-white text-xs"></div>
+                        <div><label class="text-[10px] text-gold font-bold uppercase">Opp Score</label><input type="number" id="editOppScore" value="${g.oppScore}" class="w-full bg-black border border-gray-700 p-2 rounded text-white text-xs"></div>
+                        <div><label class="text-[10px] text-gold font-bold uppercase italic">Opponent</label><div class="text-xs font-bold text-white mt-1">${g.opp}</div></div>
+                        <div><label class="text-[10px] text-gold font-bold uppercase italic">Date</label><div class="text-xs font-bold text-white mt-1">${g.date}</div></div>
                     </div>
-
-                    <!-- Player Stats Table -->
-                    <div class="bg-gray-950 border border-gray-800 rounded-xl overflow-hidden">
-                        <div class="p-3 bg-gray-900 text-[10px] font-black uppercase text-gold">Player Performance</div>
+                    <div class="bg-gray-950 border border-gray-800 rounded-xl overflow-hidden shadow-inner">
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-xs">
                                 <thead class="bg-black text-gray-500"><tr><th class="p-2">Player</th>${STAT_FIELDS.map(f=>`<th class="p-1 text-center font-bold">${f.toUpperCase()}</th>`).join('')}</tr></thead>
@@ -416,8 +443,6 @@
                             </table>
                         </div>
                     </div>
-
-                    <!-- Tactical Data -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div class="bg-gray-950 border border-gray-800 rounded-xl p-4">
                             <h4 class="text-[10px] font-black uppercase text-gold mb-4">Edit Offensive Sets</h4>
@@ -425,15 +450,15 @@
                             <button onclick="addSetPlayInput('editSetPlayInputs')" class="mt-2 text-[8px] uppercase font-black text-gold">Add Play</button>
                         </div>
                         <div class="bg-gray-950 border border-gray-800 rounded-xl p-4 text-center">
-                            <h4 class="text-[10px] font-black uppercase text-gold mb-4">Edit Heat Map Zones</h4>
+                            <h4 class="text-[10px] font-black uppercase text-gold mb-4">Edit Heat Map (Makes / Atts)</h4>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <p class="text-[8px] font-bold text-gray-500 mb-2 uppercase">Eagles Makes</p>
-                                    ${SHOT_ZONES.map(z => `<div class="flex justify-between items-center mb-1"><span class="text-[8px] uppercase text-gray-400">${z}</span><input type="number" class="w-10 bg-black border border-gray-800 text-xs p-1 text-center text-white" id="edit-eagles-${z}" value="${g.shotMap?.eagles?.[z] || 0}"></div>`).join('')}
+                                    <p class="text-[8px] font-bold text-gray-500 mb-2 uppercase italic">Eagles</p>
+                                    ${SHOT_ZONES.map(z => `<div class="flex justify-between items-center mb-1"><span class="text-[8px] uppercase text-gray-400 font-black">${z}</span><div class="flex gap-1"><input type="number" class="w-8 bg-black border border-gray-800 text-[10px] text-center text-white" id="edit-eagles-m-${z}" value="${g.shotMap?.eagles?.[z]?.m || 0}"><span class="text-[8px] text-gray-600">/</span><input type="number" class="w-8 bg-black border border-gray-800 text-[10px] text-center text-white" id="edit-eagles-a-${z}" value="${g.shotMap?.eagles?.[z]?.a || 0}"></div></div>`).join('')}
                                 </div>
                                 <div>
-                                    <p class="text-[8px] font-bold text-gray-500 mb-2 uppercase">Opponent Makes</p>
-                                    ${SHOT_ZONES.map(z => `<div class="flex justify-between items-center mb-1"><span class="text-[8px] uppercase text-gray-400">${z}</span><input type="number" class="w-10 bg-black border border-gray-800 text-xs p-1 text-center text-white" id="edit-opp-${z}" value="${g.shotMap?.opp?.[z] || 0}"></div>`).join('')}
+                                    <p class="text-[8px] font-bold text-gray-500 mb-2 uppercase italic">Opponent</p>
+                                    ${SHOT_ZONES.map(z => `<div class="flex justify-between items-center mb-1"><span class="text-[8px] uppercase text-gray-400 font-black">${z}</span><div class="flex gap-1"><input type="number" class="w-8 bg-black border border-gray-800 text-[10px] text-center text-white" id="edit-opp-m-${z}" value="${g.shotMap?.opp?.[z]?.m || 0}"><span class="text-[8px] text-gray-600">/</span><input type="number" class="w-8 bg-black border border-gray-800 text-[10px] text-center text-white" id="edit-opp-a-${z}" value="${g.shotMap?.opp?.[z]?.a || 0}"></div></div>`).join('')}
                                 </div>
                             </div>
                         </div>
@@ -442,44 +467,28 @@
 
             modalBody.innerHTML = html;
             (g.setPlays || []).forEach(p => addSetPlayInput('editSetPlayInputs', p));
-            if(!(g.setPlays?.length)) for(let i=0; i<2; i++) addSetPlayInput('editSetPlayInputs');
 
             document.getElementById('saveEditBtn').onclick = () => {
-                g.date = document.getElementById('editDate').value;
-                g.opp = document.getElementById('editOpp').value;
                 g.oppScore = parseInt(document.getElementById('editOppScore').value)||0;
-                
-                // Save Players
                 let tP = 0;
                 g.stats.forEach(s => {
                     STAT_FIELDS.forEach(f => { const i = document.querySelector(`[data-edit-player="${s.name}"][data-edit-stat="${f}"]`); if(i) s[f] = parseInt(i.value)||0; });
                     s.pts = (s.fg2m*2)+(s.fg3m*3)+s.ftm; tP += s.pts;
                 });
-                g.teamScore = tP;
-                g.result = tP > g.oppScore ? 'W' : (tP < g.oppScore ? 'L' : 'T');
-
-                // Save Sets
-                g.setPlays = [];
-                document.querySelectorAll('#editSetPlayInputs > div').forEach(row => {
-                    const name = row.querySelector('.set-name').value;
-                    if(name) g.setPlays.push({ name: name, run: parseInt(row.querySelector('.set-run').value)||0, scored: parseInt(row.querySelector('.set-scored').value)||0, pts: parseInt(row.querySelector('.set-pts').value)||0 });
+                g.teamScore = tP; g.result = tP > g.oppScore ? 'W' : (tP < g.oppScore ? 'L' : 'T');
+                g.setPlays = []; document.querySelectorAll('#editSetPlayInputs > div').forEach(row => { const nameI = row.querySelector('.set-name'); if(nameI && nameI.value) g.setPlays.push({ name: nameI.value, run: parseInt(row.querySelector('.set-run').value)||0, scored: parseInt(row.querySelector('.set-scored').value)||0, pts: parseInt(row.querySelector('.set-pts').value)||0 }); });
+                g.shotMap = { eagles: {}, opp: {} }; SHOT_ZONES.forEach(z => { 
+                    g.shotMap.eagles[z] = { m: parseInt(document.getElementById(`edit-eagles-m-${z}`).value)||0, a: parseInt(document.getElementById(`edit-eagles-a-${z}`).value)||0 };
+                    g.shotMap.opp[z] = { m: parseInt(document.getElementById(`edit-opp-m-${z}`).value)||0, a: parseInt(document.getElementById(`edit-opp-a-${z}`).value)||0 };
                 });
-
-                // Save Zones
-                g.shotMap = { eagles: {}, opp: {} };
-                SHOT_ZONES.forEach(z => {
-                    g.shotMap.eagles[z] = parseInt(document.getElementById(`edit-eagles-${z}`).value)||0;
-                    g.shotMap.opp[z] = parseInt(document.getElementById(`edit-opp-${z}`).value)||0;
-                });
-
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(h));
                 closeEditModal(); renderGameLog();
             };
         };
 
         function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
-        function clearData() { if(confirm("Permanently delete all season data?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
-
+        function clearData() { if(confirm("Coach, reset all season data?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
+        
         function handleImport(input) {
             const file = input.files[0]; if(!file) return;
             const reader = new FileReader();
@@ -502,12 +511,11 @@
                 } catch (err) { alert("Error importing CSV."); }
             }; reader.readAsText(file);
         }
-
         function exportToCSV() {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             let c = "Date,Opponent,OppScore,Player,2PM,2PA,3PM,3PA,FTM,FTA,REB,AST,STL,TO,PTS\n";
             h.forEach(g => g.stats.forEach(s => c += `${g.date},${g.opp},${g.oppScore},${s.name},${s.fg2m},${s.fg2a},${s.fg3m},${s.fg3a},${s.ftm},${s.fta},${s.reb},${s.ast},${s.stl},${s.to},${s.pts}\n`));
-            const b = new Blob([c], {type:'text/csv'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'Eagles_Stats_V17.csv'; a.click();
+            const b = new Blob([c], {type:'text/csv'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'Eagles_Stats_Export.csv'; a.click();
         }
     </script>
 </body>
