@@ -191,6 +191,12 @@
 
         <!-- GAME LOG -->
         <main id="view-log" class="hidden p-4 md:p-8 space-y-6 animate-fadeIn">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <h2 class="text-2xl font-black text-gold uppercase italic">Season Game History</h2>
+                <div class="flex gap-2 w-full md:w-auto">
+                    <input type="text" id="logSearch" onkeyup="renderGameLog()" placeholder="Search Opponent..." class="bg-gray-900 border border-gray-800 p-2 rounded text-xs text-white outline-none focus:border-gold flex-1 md:w-48">
+                </div>
+            </div>
             <div id="gameLogArea" class="space-y-4"></div>
         </main>
 
@@ -214,7 +220,6 @@
                     </label>
                     <button onclick="clearData()" class="bg-red-900 text-white px-8 py-4 rounded-xl font-black uppercase text-xs hover:bg-red-700">Purge Data</button>
                 </div>
-                <p class="text-[10px] text-gray-500 uppercase font-bold italic">Note: Use the "Download Data" button to backup your season before purging.</p>
             </div>
         </main>
 
@@ -246,9 +251,10 @@
 
         const STAT_FIELDS = ['fg2m','fg2a','fg3m','fg3a','ftm','fta','reb','ast','stl','to','fouls'];
         const SHOT_ZONES = ['paint', 'ml', 'mr', '3l', '3r', '3t'];
-        const STORAGE_KEY = 'eagles_tactical_v19_final';
+        const STORAGE_KEY = 'eagles_basketball_dashboard_v20';
 
         let profileChart = null;
+        let currentGameEditIndex = null;
 
         window.onload = () => {
             const entryTable = document.getElementById('rosterRows');
@@ -261,11 +267,11 @@
             document.getElementById('gameDate').valueAsDate = new Date();
         };
 
-        function addSetPlayInput() {
+        function addSetPlayInput(targetId = 'setPlayInputs', play = {name:'', run:0, scored:0, pts:0}) {
             const div = document.createElement('div');
             div.className = "grid grid-cols-5 gap-2 items-center";
-            div.innerHTML = `<input type="text" placeholder="Play Name" class="col-span-2 bg-gray-900 border border-gray-800 p-2 rounded text-xs text-white set-name"><input type="number" placeholder="Run" class="bg-black border border-gray-800 p-2 rounded text-xs text-white set-run"><input type="number" placeholder="Scored" class="bg-black border border-gray-800 p-2 rounded text-xs text-white set-scored"><input type="number" placeholder="Pts" class="bg-black border border-gray-800 p-2 rounded text-xs text-white set-pts">`;
-            document.getElementById('setPlayInputs').appendChild(div);
+            div.innerHTML = `<input type="text" placeholder="Play Name" value="${play.name}" class="col-span-2 bg-gray-900 border border-gray-800 p-2 rounded text-xs text-white set-name"><input type="number" placeholder="Run" value="${play.run}" class="bg-black border border-gray-800 p-2 rounded text-xs text-white set-run"><input type="number" placeholder="Scored" value="${play.scored}" class="bg-black border border-gray-800 p-2 rounded text-xs text-white set-scored"><input type="number" placeholder="Pts" value="${play.pts}" class="bg-black border border-gray-800 p-2 rounded text-xs text-white set-pts">`;
+            document.getElementById(targetId).appendChild(div);
         }
 
         function toggleView(v) {
@@ -296,11 +302,9 @@
             game.teamScore = teamPts;
             game.result = teamPts > oppScore ? 'W' : (teamPts < oppScore ? 'L' : 'T');
 
-            document.querySelectorAll('#setPlayInputs > div').forEach(row => {
+            document.querySelectorAll('#setPlayInputs > div:not(.text-gray-500)').forEach(row => {
                 const name = row.querySelector('.set-name').value;
-                if(name) {
-                    game.setPlays.push({ name: name, run: parseInt(row.querySelector('.set-run').value)||0, scored: parseInt(row.querySelector('.set-scored').value)||0, pts: parseInt(row.querySelector('.set-pts').value)||0 });
-                }
+                if(name) game.setPlays.push({ name: name, run: parseInt(row.querySelector('.set-run').value)||0, scored: parseInt(row.querySelector('.set-scored').value)||0, pts: parseInt(row.querySelector('.set-pts').value)||0 });
             });
 
             SHOT_ZONES.forEach(z => {
@@ -309,14 +313,13 @@
             });
 
             h.push(game); localStorage.setItem(STORAGE_KEY, JSON.stringify(h));
-            alert("Coach, Season Data Updated."); location.reload();
+            alert("Season Data Updated."); location.reload();
         }
 
         function renderTactics() {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const plays = {};
             const heat = { paint:0, ml:0, mr:0, '3l':0, '3r':0, '3t':0 };
-            
             h.forEach(g => {
                 g.setPlays?.forEach(p => {
                     if(!plays[p.name]) plays[p.name] = { name: p.name, run:0, scored:0, pts:0 };
@@ -324,11 +327,8 @@
                 });
                 Object.entries(g.shotMap?.eagles || {}).forEach(([zone, val]) => heat[zone] += val);
             });
-
             const sortedPlays = Object.values(plays).sort((a,b) => (b.pts/b.run || 0) - (a.pts/a.run || 0));
-            document.getElementById('playEfficiencyBody').innerHTML = sortedPlays.map(p => `
-                <tr class="border-b border-gray-900"><td class="p-4 font-bold text-gold">${p.name}</td><td class="text-center">${p.run}</td><td class="text-center">${p.scored}</td><td class="text-center">${p.pts}</td><td class="text-center font-black text-white">${(p.pts/p.run || 0).toFixed(2)}</td></tr>`).join('') || '<tr><td colspan="5" class="p-10 text-center text-gray-700">No tactical data logged.</td></tr>';
-
+            document.getElementById('playEfficiencyBody').innerHTML = sortedPlays.map(p => `<tr class="border-b border-gray-900"><td class="p-4 font-bold text-gold">${p.name}</td><td class="text-center">${p.run}</td><td class="text-center">${p.scored}</td><td class="text-center">${p.pts}</td><td class="text-center font-black text-white">${(p.pts/p.run || 0).toFixed(2)}</td></tr>`).join('') || '<tr><td colspan="5" class="p-10 text-center text-gray-700 uppercase text-[10px]">No tactical data.</td></tr>';
             const maxVal = Math.max(...Object.values(heat)) || 1;
             const court = document.getElementById('seasonHeatMap'); court.innerHTML = '';
             Object.entries(heat).forEach(([zone, val]) => {
@@ -342,22 +342,12 @@
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             if (h.length === 0) return;
             const latest = h[h.length - 1];
-            let wins = h.filter(g => g.result === 'W').length;
-            let tPts = h.reduce((a,b)=>a+b.teamScore,0), tOpp = h.reduce((a,b)=>a+b.oppScore,0);
-
-            document.getElementById('teamOverviewGrid').innerHTML = `
-                <div class="bg-black border border-gold p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Record</div><div class="text-2xl font-black text-gold">${wins}-${h.length-wins}</div></div>
-                <div class="bg-black border border-gray-800 p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Season PPG</div><div class="text-2xl font-black italic text-white">${(tPts/h.length).toFixed(1)}</div></div>
-                <div class="bg-black border border-gray-800 p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Opponent PPG</div><div class="text-2xl font-black italic text-red-500">${(tOpp/h.length).toFixed(1)}</div></div>
-                <div class="bg-black border border-gray-800 p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Last Margin</div><div class="text-2xl font-black ${latest.teamScore > latest.oppScore ? 'text-green-500' : 'text-red-500'}">${latest.teamScore - latest.oppScore}</div></div>`;
-
+            let wins = h.filter(g => g.result === 'W').length, tPts = h.reduce((a,b)=>a+b.teamScore,0), tOpp = h.reduce((a,b)=>a+b.oppScore,0);
+            document.getElementById('teamOverviewGrid').innerHTML = `<div class="bg-black border border-gold p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Record</div><div class="text-2xl font-black text-gold">${wins}-${h.length-wins}</div></div><div class="bg-black border border-gray-800 p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Season PPG</div><div class="text-2xl font-black italic">${(tPts/h.length).toFixed(1)}</div></div><div class="bg-black border border-gray-800 p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Opponent PPG</div><div class="text-2xl font-black italic text-red-500">${(tOpp/h.length).toFixed(1)}</div></div><div class="bg-black border border-gray-800 p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Last Margin</div><div class="text-2xl font-black ${latest.teamScore > latest.oppScore ? 'text-green-500' : 'text-red-500'}">${latest.teamScore - latest.oppScore}</div></div>`;
             const pT = {}; ROSTER.forEach(p => pT[p.name] = { a:0, t:0, r:0, gp:0 });
-            let tAst = 0, tFgm = 0;
-            h.forEach(g => g.stats.forEach(s => { pT[s.name].gp++; pT[s.name].a += s.ast; pT[s.name].t += s.to; pT[s.name].r += s.reb; tAst += s.ast; tFgm += (s.fg2m + s.fg3m); }));
-            
+            let tAst = 0, tFgm = 0; h.forEach(g => g.stats.forEach(s => { pT[s.name].gp++; pT[s.name].a += s.ast; pT[s.name].t += s.to; pT[s.name].r += s.reb; tAst += s.ast; tFgm += (s.fg2m + s.fg3m); }));
             document.getElementById('reboundLeaders').innerHTML = ROSTER.map(p => ({ n: p.name, v: pT[p.name].gp > 0 ? (pT[p.name].r / pT[p.name].gp).toFixed(1) : 0 })).sort((a,b)=>b.v-a.v).slice(0,5).map(p => `<div class="flex justify-between p-2 rounded bg-gray-900 border border-gray-800"><span class="text-xs font-bold">${p.n}</span><span class="font-black text-white">${p.v}</span></div>`).join('');
             document.getElementById('teamPhilo').innerHTML = `<div class="space-y-4"><div class="flex justify-between text-[10px] font-bold text-gray-400"><span>AST on FG% (Goal: 65%)</span> <span>${(tAst/tFgm*100 || 0).toFixed(0)}%</span></div><div class="h-2 bg-gray-800 rounded-full overflow-hidden"><div class="h-full bg-gold" style="width: ${tFgm>0?(tAst/tFgm*100):0}%"></div></div></div>`;
-            
             const allP = []; h.forEach(g => g.stats.forEach(s => allP.push({ n: s.name, pts: s.pts, reb: s.reb, date: g.date })));
             const findH = (k) => { let max = Math.max(...allP.map(o => o[k])); return allP.filter(o => o[k] === max && max > 0); };
             document.getElementById('honorRoll').innerHTML = [{t:'Points', k:'pts'}, {t:'Rebounds', k:'reb'}].map(s => `<div class="p-3 bg-gray-900 border border-gray-800 rounded-xl mb-2"><div class="text-[9px] text-gray-500 uppercase font-black mb-2">${s.t} Record</div>${findH(s.k).map(w => `<div class="flex justify-between items-baseline"><div><div class="text-sm font-black uppercase text-white">${w.n}</div><div class="text-[8px] text-gray-500 uppercase">${w.date}</div></div><div class="text-xl font-black text-gold">${w[s.k]}</div></div>`).join('')}</div>`).join('');
@@ -369,58 +359,34 @@
             const pM = {}; ROSTER.forEach(r => pM[r.name] = { gp:0, pts:0, reb:0, ast:0, to:0, h:0, l:Infinity, pos:r.pos });
             h.forEach(g => g.stats.forEach(s => { const p = pM[s.name]; if (!p) return; p.gp++; p.pts += s.pts; p.reb += s.reb; p.ast += s.ast; p.to += s.to; if(s.pts > p.h) p.h = s.pts; if(s.pts < p.l) p.l = s.pts; }));
             let html = `<table class="w-full text-left text-[10px]"><thead class="bg-gray-950 text-gray-500 uppercase"><tr><th class="p-4">Player</th><th>POS</th><th>GP</th><th>PPG</th><th>RPG</th><th>APG</th><th>TOPG</th><th>H/L</th></tr></thead><tbody>`;
-            for(let n in pM) { 
-                const p = pM[n]; if(p.gp === 0) continue; 
-                if(posF !== 'all' && p.pos !== posF) continue;
-                html += `<tr class="border-b border-gray-900"><td class="p-4 font-bold text-gold">${n}</td><td><span class="text-gray-600 font-black">${p.pos}</span></td><td>${p.gp}</td><td>${(p.pts/p.gp).toFixed(1)}</td><td>${(p.reb/p.gp).toFixed(1)}</td><td>${(p.ast/p.gp).toFixed(1)}</td><td>${(p.to/p.gp).toFixed(1)}</td><td><span class="text-green-500">${p.h}</span> / <span class="text-red-500">${p.l}</span></td></tr>`; 
-            }
+            for(let n in pM) { const p = pM[n]; if(p.gp === 0) continue; if(posF !== 'all' && p.pos !== posF) continue; html += `<tr class="border-b border-gray-900"><td class="p-4 font-bold text-gold">${n}</td><td><span class="text-gray-600 font-black">${p.pos}</span></td><td>${p.gp}</td><td>${(p.pts/p.gp).toFixed(1)}</td><td>${(p.reb/p.gp).toFixed(1)}</td><td>${(p.ast/p.gp).toFixed(1)}</td><td>${(p.to/p.gp).toFixed(1)}</td><td><span class="text-green-500">${p.h}</span> / <span class="text-red-500">${p.l}</span></td></tr>`; }
             document.getElementById('summaryTableArea').innerHTML = html + `</tbody></table>`;
         }
 
         function renderGameLog() {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const search = document.getElementById('logSearch').value.toLowerCase();
             const area = document.getElementById('gameLogArea');
             if(h.length === 0) return area.innerHTML = `<div class="text-center py-20 text-gray-600 uppercase text-xs tracking-widest">No entries found.</div>`;
-            area.innerHTML = h.map((g, idx) => `<div class="bg-black border border-gray-800 rounded-xl overflow-hidden shadow-lg mb-4"><div class="bg-gray-900 p-4 flex justify-between items-center border-b border-gray-800"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded bg-gray-950 border border-gray-800 flex items-center justify-center font-black text-xl ${g.result==='W'?'text-gold':'text-red-600'}">${g.result||'?'}</div><div><span class="text-[9px] text-gray-500 font-bold block uppercase">${g.date}</span><span class="text-xl font-black italic uppercase">Eagles ${g.teamScore}, ${g.opp} ${g.oppScore||0}</span></div></div><button onclick="openEditStats(${idx})" class="text-white uppercase text-[8px] font-bold bg-gray-800 px-3 py-1 rounded">Edit</button></div></div>`).join('');
+            const filtered = h.filter(g => g.opp.toLowerCase().includes(search));
+            area.innerHTML = filtered.map((g, idx) => `<div class="bg-black border border-gray-800 rounded-xl overflow-hidden shadow-lg mb-4"><div class="bg-gray-900 p-4 flex justify-between items-center border-b border-gray-800"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded bg-gray-950 border border-gray-800 flex items-center justify-center font-black text-xl ${g.result==='W'?'text-gold':'text-red-600'}">${g.result||'?'}</div><div><span class="text-[9px] text-gray-500 font-bold block uppercase">${g.date}</span><span class="text-xl font-black italic uppercase">Eagles ${g.teamScore}, ${g.opp} ${g.oppScore||0}</span></div></div><button onclick="openEditStats(${h.indexOf(g)})" class="text-white uppercase text-[8px] font-bold bg-gray-800 px-3 py-1 rounded hover:bg-gold hover:text-black">Edit Data</button></div></div>`).join('');
         }
 
         function renderPlayerProfile() {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const name = document.getElementById('profilePicker').value;
             const area = document.getElementById('playerProfileArea');
-            if(!name) { area.innerHTML = `<div class="text-center py-10 text-gray-600 uppercase text-xs">Select a player.</div>`; return; }
-
+            if(!name) { area.innerHTML = `<div class="text-center py-10 text-gray-600 uppercase text-xs uppercase font-bold italic">Select an Eagle above to view her stats</div>`; return; }
             const s = { gp:0, pts:0, reb:0, ast:0, to:0, stl:0, ftm:0, fta:0, fg2m:0, fg2a:0, fg3m:0, fg3a:0, highs: { fgm: {v:0,g:""}, fga: {v:0,g:""}, fg3m: {v:0,g:""}, fg3a: {v:0,g:""}, ftm: {v:0,g:""}, fta: {v:0,g:""}, reb: {v:0,g:""}, ast: {v:0,g:""}, stl: {v:0,g:""}, to: {v:0,g:""}, pts: {v:0,g:""} }, trend:[], pos:"" };
             const sortedGames = [...h].sort((a,b) => new Date(a.date) - new Date(b.date));
             const checkH = (k, val, game) => { if(val >= s.highs[k].v) { s.highs[k].v = val; s.highs[k].g = `vs ${game.opp} (${game.date})`; } };
-
             sortedGames.forEach(g => {
                 const p = g.stats.find(pl => pl.name === name);
-                if(p) {
-                    s.gp++; s.pts += p.pts; s.reb += p.reb; s.ast += p.ast; s.to += p.to; s.stl += p.stl; s.ftm += p.ftm; s.fta += p.fta; s.fg2m += p.fg2m; s.fg2a += p.fg2a; s.fg3m += p.fg3m; s.fg3a += p.fg3a; s.pos = p.pos;
-                    checkH('pts', p.pts, g); checkH('reb', p.reb, g); checkH('ast', p.ast, g); checkH('stl', p.stl, g); checkH('to', p.to, g);
-                    checkH('fgm', p.fg2m + p.fg3m, g); checkH('fga', p.fg2a + p.fg3a, g); checkH('fg3m', p.fg3m, g); checkH('fg3a', p.fg3a, g); checkH('ftm', p.ftm, g); checkH('fta', p.fta, g);
-                    s.trend.push({o: g.opp, v: p.pts});
-                }
+                if(p) { s.gp++; s.pts += p.pts; s.reb += p.reb; s.ast += p.ast; s.to += p.to; s.stl += p.stl; s.ftm += p.ftm; s.fta += p.fta; s.fg2m += p.fg2m; s.fg2a += p.fg2a; s.fg3m += p.fg3m; s.fg3a += p.fg3a; s.pos = p.pos; checkH('pts', p.pts, g); checkH('reb', p.reb, g); checkH('ast', p.ast, g); checkH('stl', p.stl, g); checkH('to', p.to, g); checkH('fgm', p.fg2m + p.fg3m, g); checkH('fga', p.fg2a + p.fg3a, g); checkH('fg3m', p.fg3m, g); checkH('fg3a', p.fg3a, g); checkH('ftm', p.ftm, g); checkH('fta', p.fta, g); s.trend.push({o: g.opp, v: p.pts}); }
             });
-
+            if(s.gp === 0) { area.innerHTML = `<div class="text-center py-20 text-gray-600">No data found.</div>`; return; }
             const pct = (m, a) => a > 0 ? ((m/a)*100).toFixed(1) + '%' : '0.0%';
-            area.innerHTML = `
-                <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
-                    <div class="lg:col-span-1 bg-black border border-gold p-6 rounded-3xl text-center shadow-2xl">
-                        <div class="text-gold text-[10px] font-black uppercase mb-1">${s.pos} | Eagles Varsity</div>
-                        <h2 class="text-2xl font-black uppercase text-white mb-4">${name}</h2>
-                        <div class="grid grid-cols-3 gap-1"><div class="bg-gray-950 p-2 rounded border border-gray-800"><div class="text-[7px] uppercase font-bold text-gray-500">TOTAL</div><div class="text-base font-black text-gold">${s.pts}</div></div><div class="bg-gray-950 p-2 rounded border border-gray-800"><div class="text-[7px] uppercase font-bold text-gray-500">PPG</div><div class="text-base font-black text-white">${(s.pts/s.gp||0).toFixed(1)}</div></div><div class="bg-gray-950 p-2 rounded border border-gray-800"><div class="text-[7px] uppercase font-bold text-gray-500">RPG</div><div class="text-base font-black text-white">${(s.reb/s.gp||0).toFixed(1)}</div></div></div>
-                    </div>
-                    <div class="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
-                        ${[{l:'2PT%',v:pct(s.fg2m,s.fg2a)},{l:'3PT%',v:pct(s.fg3m,s.fg3a)},{l:'FT%',v:pct(s.ftm,s.fta)},{l:'AST:TO',v:(s.ast/s.to||0).toFixed(1)}].map(x => `<div class="profile-stat-box"><div class="text-[8px] uppercase font-bold text-gray-500 mb-1">${x.l}</div><div class="text-3xl font-black text-white">${x.v}</div></div>`).join('')}
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="bg-black border border-gray-800 p-6 rounded-3xl"><h3 class="text-xs font-black uppercase tracking-widest text-gray-500 mb-4">Season Highs (Single Game)</h3><div class="grid grid-cols-2 md:grid-cols-5 gap-3">${Object.entries(s.highs).map(([k, d]) => `<div class="bg-gray-950 border border-gray-900 p-2 rounded text-center"><div class="text-[7px] uppercase font-bold text-gray-500 mb-1">${k.toUpperCase()}</div><div class="text-lg font-black text-white">${d.v}</div><div class="high-context">${d.g || '-'}</div></div>`).join('')}</div></div>
-                    <div class="bg-black border border-gray-800 p-6 rounded-3xl h-64"><h3 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Scoring Trend</h3><canvas id="profileTrendChart"></canvas></div>
-                </div>`;
-            
+            area.innerHTML = `<div class="grid grid-cols-1 lg:grid-cols-4 gap-4"><div class="lg:col-span-1 bg-black border border-gold p-6 rounded-3xl text-center shadow-2xl"><div class="text-gold text-[10px] font-black uppercase mb-1">${s.pos} | Eagles Varsity</div><h2 class="text-2xl font-black uppercase text-white mb-4">${name}</h2><div class="grid grid-cols-3 gap-1"><div class="bg-gray-950 p-2 rounded border border-gray-800"><div class="text-[7px] uppercase font-bold text-gray-500">TOTAL</div><div class="text-base font-black text-gold">${s.pts}</div></div><div class="bg-gray-950 p-2 rounded border border-gray-800"><div class="text-[7px] uppercase font-bold text-gray-500">PPG</div><div class="text-base font-black text-white">${(s.pts/s.gp).toFixed(1)}</div></div><div class="bg-gray-950 p-2 rounded border border-gray-800"><div class="text-[7px] uppercase font-bold text-gray-500">RPG</div><div class="text-base font-black text-white">${(s.reb/s.gp).toFixed(1)}</div></div></div></div><div class="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">${[{l:'2PT%',v:pct(s.fg2m,s.fg2a)},{l:'3PT%',v:pct(s.fg3m,s.fg3a)},{l:'FT%',v:pct(s.ftm,s.fta)},{l:'AST:TO',v:(s.ast/s.to||0).toFixed(1)}].map(x => `<div class="profile-stat-box"><div class="text-[8px] uppercase font-bold text-gray-500 mb-1">${x.l}</div><div class="text-3xl font-black text-white">${x.v}</div></div>`).join('')}</div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div class="bg-black border border-gray-800 p-6 rounded-3xl"><h3 class="text-xs font-black uppercase tracking-widest text-gray-500 mb-4">Season Highs (Single Game)</h3><div class="grid grid-cols-2 md:grid-cols-5 gap-3">${Object.entries(s.highs).map(([k, d]) => `<div class="bg-gray-950 border border-gray-900 p-2 rounded text-center"><div class="text-[7px] uppercase font-bold text-gray-500 mb-1">${k.toUpperCase()}</div><div class="text-lg font-black text-white">${d.v}</div><div class="high-context">${d.g || '-'}</div></div>`).join('')}</div></div><div class="bg-black border border-gray-800 p-6 rounded-3xl h-64"><h3 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Scoring Trend</h3><canvas id="profileTrendChart"></canvas></div></div>`;
             if(profileChart) profileChart.destroy();
             profileChart = new Chart(document.getElementById('profileTrendChart').getContext('2d'), { type: 'line', data: { labels: s.trend.map(t => t.o), datasets: [{ label: 'Points', data: s.trend.map(t => t.v), borderColor: '#FFB81C', backgroundColor: 'rgba(255,184,28,0.1)', fill: true, tension: 0.4 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#222' } }, x: { grid: { display: false }, ticks: { font: { size: 8 } } } } } });
         }
@@ -428,18 +394,91 @@
         window.openEditStats = function(idx) {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const g = h[idx]; currentGameEditIndex = idx;
+            const modalBody = document.getElementById('editModalBody');
             document.getElementById('editModal').classList.remove('hidden');
-            let html = `<div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-950 border-b border-gray-800"><div><label class="text-[10px] text-gold font-bold uppercase">Opp Score</label><input type="number" id="editOppScore" value="${g.oppScore}" class="w-full bg-black border border-gray-700 p-2 rounded text-white text-xs"></div></div><div class="p-4 overflow-x-auto"><table class="w-full text-left text-xs"><thead><tr class="text-gold text-[9px] uppercase border-b border-gray-800"><th class="p-2 sticky-col">Player</th>${STAT_FIELDS.map(f=>`<th class="p-1 text-center">${f.toUpperCase()}</th>`).join('')}</tr></thead><tbody>${g.stats.map(s => `<tr><td class="p-2 font-bold text-gray-300 sticky-col">${s.name}</td>${STAT_FIELDS.map(f=>`<td class="p-1 text-center"><input type="number" data-edit-player="${s.name}" data-edit-stat="${f}" value="${s[f]||0}" class="stat-input"></td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
-            document.getElementById('editModalBody').innerHTML = html;
+
+            let html = `
+                <div class="p-6 space-y-8">
+                    <!-- General Game Info -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-950 border border-gray-800 rounded-xl">
+                        <div><label class="text-[10px] text-gold font-bold uppercase">Date</label><input type="date" id="editDate" value="${g.date}" class="w-full bg-black border border-gray-700 p-2 rounded text-white text-xs"></div>
+                        <div><label class="text-[10px] text-gold font-bold uppercase">Opponent</label><input type="text" id="editOpp" value="${g.opp}" class="w-full bg-black border border-gray-700 p-2 rounded text-white text-xs"></div>
+                        <div><label class="text-[10px] text-red-500 font-bold uppercase">Opp Score</label><input type="number" id="editOppScore" value="${g.oppScore}" class="w-full bg-black border border-gray-700 p-2 rounded text-white text-xs"></div>
+                    </div>
+
+                    <!-- Player Stats Table -->
+                    <div class="bg-gray-950 border border-gray-800 rounded-xl overflow-hidden">
+                        <div class="p-3 bg-gray-900 text-[10px] font-black uppercase text-gold">Player Performance</div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-black text-gray-500"><tr><th class="p-2">Player</th>${STAT_FIELDS.map(f=>`<th class="p-1 text-center font-bold">${f.toUpperCase()}</th>`).join('')}</tr></thead>
+                                <tbody>${g.stats.map(s => `<tr><td class="p-2 font-bold text-gray-300">${s.name}</td>${STAT_FIELDS.map(f=>`<td class="p-1 text-center"><input type="number" data-edit-player="${s.name}" data-edit-stat="${f}" value="${s[f]||0}" class="stat-input"></td>`).join('')}</tr>`).join('')}</tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tactical Data -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-gray-950 border border-gray-800 rounded-xl p-4">
+                            <h4 class="text-[10px] font-black uppercase text-gold mb-4">Edit Offensive Sets</h4>
+                            <div id="editSetPlayInputs" class="space-y-2"></div>
+                            <button onclick="addSetPlayInput('editSetPlayInputs')" class="mt-2 text-[8px] uppercase font-black text-gold">Add Play</button>
+                        </div>
+                        <div class="bg-gray-950 border border-gray-800 rounded-xl p-4 text-center">
+                            <h4 class="text-[10px] font-black uppercase text-gold mb-4">Edit Heat Map Zones</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-[8px] font-bold text-gray-500 mb-2 uppercase">Eagles Makes</p>
+                                    ${SHOT_ZONES.map(z => `<div class="flex justify-between items-center mb-1"><span class="text-[8px] uppercase text-gray-400">${z}</span><input type="number" class="w-10 bg-black border border-gray-800 text-xs p-1 text-center text-white" id="edit-eagles-${z}" value="${g.shotMap?.eagles?.[z] || 0}"></div>`).join('')}
+                                </div>
+                                <div>
+                                    <p class="text-[8px] font-bold text-gray-500 mb-2 uppercase">Opponent Makes</p>
+                                    ${SHOT_ZONES.map(z => `<div class="flex justify-between items-center mb-1"><span class="text-[8px] uppercase text-gray-400">${z}</span><input type="number" class="w-10 bg-black border border-gray-800 text-xs p-1 text-center text-white" id="edit-opp-${z}" value="${g.shotMap?.opp?.[z] || 0}"></div>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+            modalBody.innerHTML = html;
+            (g.setPlays || []).forEach(p => addSetPlayInput('editSetPlayInputs', p));
+            if(!(g.setPlays?.length)) for(let i=0; i<2; i++) addSetPlayInput('editSetPlayInputs');
+
             document.getElementById('saveEditBtn').onclick = () => {
+                g.date = document.getElementById('editDate').value;
+                g.opp = document.getElementById('editOpp').value;
                 g.oppScore = parseInt(document.getElementById('editOppScore').value)||0;
-                let tP = 0; g.stats.forEach(s => { STAT_FIELDS.forEach(f => { const i = document.querySelector(`[data-edit-player="${s.name}"][data-edit-stat="${f}"]`); if(i) s[f] = parseInt(i.value)||0; }); s.pts = (s.fg2m*2)+(s.fg3m*3)+s.ftm; tP += s.pts; });
-                g.teamScore = tP; g.result = tP > g.oppScore ? 'W' : (tP < g.oppScore ? 'L' : 'T');
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(h)); closeEditModal(); renderGameLog();
+                
+                // Save Players
+                let tP = 0;
+                g.stats.forEach(s => {
+                    STAT_FIELDS.forEach(f => { const i = document.querySelector(`[data-edit-player="${s.name}"][data-edit-stat="${f}"]`); if(i) s[f] = parseInt(i.value)||0; });
+                    s.pts = (s.fg2m*2)+(s.fg3m*3)+s.ftm; tP += s.pts;
+                });
+                g.teamScore = tP;
+                g.result = tP > g.oppScore ? 'W' : (tP < g.oppScore ? 'L' : 'T');
+
+                // Save Sets
+                g.setPlays = [];
+                document.querySelectorAll('#editSetPlayInputs > div').forEach(row => {
+                    const name = row.querySelector('.set-name').value;
+                    if(name) g.setPlays.push({ name: name, run: parseInt(row.querySelector('.set-run').value)||0, scored: parseInt(row.querySelector('.set-scored').value)||0, pts: parseInt(row.querySelector('.set-pts').value)||0 });
+                });
+
+                // Save Zones
+                g.shotMap = { eagles: {}, opp: {} };
+                SHOT_ZONES.forEach(z => {
+                    g.shotMap.eagles[z] = parseInt(document.getElementById(`edit-eagles-${z}`).value)||0;
+                    g.shotMap.opp[z] = parseInt(document.getElementById(`edit-opp-${z}`).value)||0;
+                });
+
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(h));
+                closeEditModal(); renderGameLog();
             };
         };
+
         function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
-        function clearData() { if(confirm("Coach, wipe all data?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
+        function clearData() { if(confirm("Permanently delete all season data?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
 
         function handleImport(input) {
             const file = input.files[0]; if(!file) return;
@@ -463,11 +502,12 @@
                 } catch (err) { alert("Error importing CSV."); }
             }; reader.readAsText(file);
         }
+
         function exportToCSV() {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             let c = "Date,Opponent,OppScore,Player,2PM,2PA,3PM,3PA,FTM,FTA,REB,AST,STL,TO,PTS\n";
             h.forEach(g => g.stats.forEach(s => c += `${g.date},${g.opp},${g.oppScore},${s.name},${s.fg2m},${s.fg2a},${s.fg3m},${s.fg3a},${s.ftm},${s.fta},${s.reb},${s.ast},${s.stl},${s.to},${s.pts}\n`));
-            const b = new Blob([c], {type:'text/csv'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'Eagles_Basketball_Data.csv'; a.click();
+            const b = new Blob([c], {type:'text/csv'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'Eagles_Stats_V17.csv'; a.click();
         }
     </script>
 </body>
