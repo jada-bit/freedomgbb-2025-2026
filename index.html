@@ -21,9 +21,7 @@
         .inactive-nav:hover { color: white; }
         .clipboard-card { background: #0a0a0a; border: 1px solid #222; border-top: 4px solid var(--eagle-gold); }
         .profile-stat-box { background: #111; border: 1px solid #222; padding: 1rem; border-radius: 0.75rem; text-align: center; }
-        .award-badge { font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; display: inline-block; }
         .modal-overlay { background: rgba(0,0,0,0.9); backdrop-filter: blur(4px); }
-        .award-sentence { line-height: 1.6; border-left: 3px solid var(--eagle-gold); padding-left: 1rem; margin-bottom: 1rem; font-style: italic; color: #d1d5db; font-size: 0.9rem; }
         .high-context { font-size: 7.5px; text-transform: uppercase; color: #6b7280; margin-top: 4px; line-height: 1.2; }
         .filter-select { background: #111; border: 1px solid #333; font-size: 10px; color: #9ca3af; padding: 4px 8px; border-radius: 6px; outline: none; }
         .filter-select:focus { border-color: var(--eagle-gold); color: white; }
@@ -90,25 +88,6 @@
                     </table>
                 </div>
 
-                <div class="p-6 bg-gray-950 border-t border-gray-800 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div>
-                        <h4 class="text-[10px] font-black uppercase text-gold mb-2">👷 Hard Hat</h4>
-                        <select id="hardHatManual" class="w-full bg-gray-900 border border-gray-800 p-2 rounded text-white text-xs"><option value="auto">Auto-Calculate (Formula)</option></select>
-                    </div>
-                    <div>
-                        <h4 class="text-[10px] font-black uppercase text-gold mb-2">🧽 Windex Bottle</h4>
-                        <select id="windexManual" class="w-full bg-gray-900 border border-gray-800 p-2 rounded text-white text-xs"><option value="auto">Auto-Calculate (Most Rebs)</option></select>
-                    </div>
-                    <div>
-                        <h4 class="text-[10px] font-black uppercase text-gold mb-2">⚡ Hustle Award</h4>
-                        <select id="hustleAward" class="w-full bg-gray-900 border border-gray-800 p-2 rounded text-white text-xs"><option value="">Manual Selection...</option></select>
-                    </div>
-                    <div>
-                        <h4 class="text-[10px] font-black uppercase text-gold mb-2">🧱 Grit Award</h4>
-                        <select id="gritAward" class="w-full bg-gray-900 border border-gray-800 p-2 rounded text-white text-xs"><option value="">Manual Selection...</option></select>
-                    </div>
-                </div>
-
                 <div class="p-8 bg-gray-900 text-right border-t border-gray-800">
                     <button onclick="saveGame()" class="bg-gold text-black px-12 py-4 rounded-xl font-black text-xl uppercase shadow-xl hover:scale-[1.02] transition-transform">Submit Final Box Score</button>
                 </div>
@@ -119,15 +98,20 @@
         <main id="view-clipboard" class="hidden p-4 md:p-8 space-y-8 animate-fadeIn">
             <div id="teamOverviewGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
 
-            <div class="bg-black border border-gray-800 p-8 rounded-3xl relative overflow-hidden shadow-2xl">
-                <h2 class="text-2xl font-black text-gold uppercase italic mb-6 tracking-tight">Latest Game Award Citations</h2>
-                <div id="narrativeAwardsArea" class="space-y-4"></div>
-            </div>
-
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="clipboard-card p-6 rounded-2xl"><h3 class="text-lg font-black uppercase italic mb-4">Team Benchmarks</h3><div id="teamPhilo" class="space-y-4"></div></div>
-                <div class="clipboard-card p-6 rounded-2xl"><h3 class="text-lg font-black uppercase italic mb-1">Board Dominance</h3><p class="text-[10px] text-gray-500 uppercase mb-4">Season leaders</p><div id="reboundLeaders" class="space-y-2"></div></div>
-                <div class="clipboard-card p-6 rounded-2xl"><h3 class="text-lg font-black uppercase italic mb-4">Season Records</h3><div id="honorRoll" class="space-y-4"></div></div>
+                <div class="clipboard-card p-6 rounded-2xl">
+                    <h3 class="text-lg font-black uppercase italic mb-4 text-gold">Ball Movement Benchmarks</h3>
+                    <div id="teamPhilo" class="space-y-4"></div>
+                </div>
+                <div class="clipboard-card p-6 rounded-2xl">
+                    <h3 class="text-lg font-black uppercase italic mb-1 text-white">Board Leaders</h3>
+                    <p class="text-[10px] text-gray-500 uppercase mb-4 tracking-tighter">Season RPG Leaders</p>
+                    <div id="reboundLeaders" class="space-y-2"></div>
+                </div>
+                <div class="clipboard-card p-6 rounded-2xl">
+                    <h3 class="text-lg font-black uppercase italic mb-4 text-gold">Season High Records</h3>
+                    <div id="honorRoll" class="space-y-4"></div>
+                </div>
             </div>
         </main>
 
@@ -136,7 +120,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <div id="team-stats-grid" class="flex-1 grid grid-cols-2 md:grid-cols-5 gap-4"></div>
                 <div class="bg-gray-900 border border-gray-800 p-4 rounded-xl flex items-center gap-3">
-                    <label class="text-[9px] uppercase font-bold text-gray-500">Filter POS:</label>
+                    <label class="text-[9px] uppercase font-bold text-gray-500">Filter Position:</label>
                     <select id="posFilter" onchange="renderSeasonSummary()" class="filter-select">
                         <option value="all">ALL</option>
                         <option value="PG">PG</option>
@@ -152,14 +136,9 @@
         <!-- GAME LOG -->
         <main id="view-log" class="hidden p-4 md:p-8 space-y-6">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <h2 class="text-2xl font-black text-gold uppercase italic">Season History</h2>
+                <h2 class="text-2xl font-black text-gold uppercase italic">Season Game History</h2>
                 <div class="flex gap-2 w-full md:w-auto">
                     <input type="text" id="logSearch" onkeyup="renderGameLog()" placeholder="Search Opponent..." class="bg-gray-900 border border-gray-800 p-2 rounded text-xs text-white outline-none focus:border-gold flex-1 md:w-48">
-                    <select id="logAwardFilter" onchange="renderGameLog()" class="filter-select">
-                        <option value="all">All Games</option>
-                        <option value="hh">Hard Hat Games</option>
-                        <option value="win">Windex Games</option>
-                    </select>
                 </div>
             </div>
             <div id="gameLogArea" class="space-y-4"></div>
@@ -176,7 +155,7 @@
         <!-- SETTINGS -->
         <main id="view-settings" class="hidden p-4 md:p-8 space-y-8">
             <div class="bg-black border border-gray-800 p-8 rounded-3xl max-w-2xl mx-auto shadow-2xl">
-                <h2 class="text-2xl font-black text-gold uppercase italic mb-8 border-b border-gray-800 pb-4">Settings</h2>
+                <h2 class="text-2xl font-black text-gold uppercase italic mb-8 border-b border-gray-800 pb-4">Data Management</h2>
                 <div class="flex flex-wrap gap-4 mb-12">
                     <button onclick="exportToCSV()" class="bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-xl font-bold uppercase text-xs border border-gray-700 transition-all">Download Season CSV</button>
                     <label class="bg-blue-900 hover:bg-blue-800 text-white px-6 py-3 rounded-xl font-bold uppercase text-xs cursor-pointer transition-all">Import CSV File<input type="file" class="hidden" onchange="handleImport(this)"></label>
@@ -195,7 +174,7 @@
                 <div id="editModalBody" class="overflow-y-auto flex-1"></div>
                 <div class="p-6 bg-gray-900 border-t border-gray-800 flex justify-end gap-4 rounded-b-3xl">
                     <button onclick="closeEditModal()" class="px-6 py-3 font-bold uppercase text-xs text-gray-400">Cancel</button>
-                    <button id="saveEditBtn" class="bg-gold text-black px-8 py-3 rounded-xl font-black uppercase text-sm shadow-xl">Save Changes</button>
+                    <button id="saveEditBtn" class="bg-gold text-black px-8 py-3 rounded-xl font-black uppercase text-sm">Save Changes</button>
                 </div>
             </div>
         </div>
@@ -213,7 +192,7 @@
         ];
 
         const STAT_FIELDS = ['fg2m','fg2a','fg3m','fg3a','ftm','fta','reb','ast','stl','to','fouls'];
-        const STORAGE_KEY = 'eagle_hoops_v18_totalpts';
+        const STORAGE_KEY = 'eagles_basketball_dashboard_v1';
 
         let profileChart = null;
         let currentGameEditIndex = null;
@@ -221,13 +200,11 @@
         window.onload = () => {
             const entryTable = document.getElementById('rosterRows');
             const profilePicker = document.getElementById('profilePicker');
-            const selectors = [document.getElementById('hustleAward'), document.getElementById('gritAward'), document.getElementById('hardHatManual'), document.getElementById('windexManual')];
 
             ROSTER.forEach(p => {
                 entryTable.innerHTML += `<tr class="border-b border-gray-900"><td class="p-4 font-bold text-gray-400 sticky-col"><span class="text-gold text-[9px] mr-2">${p.pos}</span> #${p.id} ${p.name}</td>${STAT_FIELDS.map(s => `<td class="p-2 text-center"><input type="number" data-player="${p.name}" data-stat="${s}" class="stat-input"></td>`).join('')}</tr>`;
                 const opt = document.createElement('option'); opt.value = p.name; opt.textContent = p.name;
-                profilePicker.appendChild(opt.cloneNode(true));
-                selectors.forEach(s => s.appendChild(opt.cloneNode(true)));
+                profilePicker.appendChild(opt);
             });
             document.getElementById('gameDate').valueAsDate = new Date();
         };
@@ -245,19 +222,12 @@
             if(v === 'profiles') renderPlayerProfile();
         }
 
-        function calculateAwardWinners(stats, manualHH, manualWin) {
-            const maxR = Math.max(...stats.map(s => s.reb));
-            const maxHH = Math.max(...stats.map(s => (s.reb + s.stl + s.ast) - s.to));
-            return {
-                windex: manualWin && manualWin !== 'auto' ? [manualWin] : stats.filter(s => s.reb === maxR && maxR > 0).map(s => s.name),
-                hardHat: manualHH && manualHH !== 'auto' ? [manualHH] : stats.filter(s => ((s.reb + s.stl + s.ast) - s.to) === maxHH && maxHH > -50).map(s => s.name)
-            };
-        }
-
         function saveGame() {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const oppScore = parseInt(document.getElementById('oppScore').value) || 0;
-            const game = { date: document.getElementById('gameDate').value, opp: document.getElementById('opponent').value || 'TBD', oppScore: oppScore, hustleWinner: document.getElementById('hustleAward').value, gritWinner: document.getElementById('gritAward').value, stats: [] };
+            const game = { 
+                date: document.getElementById('gameDate').value, opp: document.getElementById('opponent').value || 'TBD', oppScore: oppScore, stats: [] 
+            };
             let teamPts = 0;
             ROSTER.forEach(p => {
                 const s = { name: p.name, id: p.id, pos: p.pos };
@@ -265,9 +235,8 @@
                 s.pts = (s.fg2m * 2) + (s.fg3m * 3) + s.ftm;
                 teamPts += s.pts; game.stats.push(s);
             });
-            const winners = calculateAwardWinners(game.stats, document.getElementById('hardHatManual').value, document.getElementById('windexManual').value);
-            game.windexWinners = winners.windex; game.hardHatWinners = winners.hardHat;
-            game.teamScore = teamPts; game.result = teamPts > oppScore ? 'W' : (teamPts < oppScore ? 'L' : 'T');
+            game.teamScore = teamPts;
+            game.result = teamPts > oppScore ? 'W' : (teamPts < oppScore ? 'L' : 'T');
             h.push(game); localStorage.setItem(STORAGE_KEY, JSON.stringify(h));
             alert("Game Logged!"); location.reload();
         }
@@ -275,29 +244,26 @@
         function renderCoachClipboard() {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             if (h.length === 0) return;
-            const latest = h[h.length - 1];
-            let wins = h.filter(g => g.result === 'W').length, tPts = h.reduce((a,b)=>a+b.teamScore,0), tOpp = h.reduce((a,b)=>a+b.oppScore,0), tReb = h.reduce((a,b)=>b.stats.reduce((x,y)=>x+y.reb,0)+a,0);
+            
+            let wins = h.filter(g => g.result === 'W').length;
+            let tPts = h.reduce((a,b)=>a+b.teamScore,0), tOpp = h.reduce((a,b)=>a+b.oppScore,0), tReb = h.reduce((a,b)=>b.stats.reduce((x,y)=>x+y.reb,0)+a,0);
             
             document.getElementById('teamOverviewGrid').innerHTML = `
-                <div class="bg-black border border-gold p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Record</div><div class="text-2xl font-black text-gold">${wins}-${h.length-wins}</div></div>
+                <div class="bg-black border border-gold p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Season Record</div><div class="text-2xl font-black text-gold">${wins}-${h.length-wins}</div></div>
                 <div class="bg-black border border-gray-800 p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Season PPG</div><div class="text-2xl font-black italic">${(tPts/h.length).toFixed(1)}</div></div>
                 <div class="bg-black border border-gray-800 p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Opponent PPG</div><div class="text-2xl font-black italic text-red-500">${(tOpp/h.length).toFixed(1)}</div></div>
                 <div class="bg-black border border-gray-800 p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Team RPG</div><div class="text-2xl font-black italic">${(tReb/h.length).toFixed(1)}</div></div>`;
 
-            const cit = [];
-            latest.hardHatWinners.forEach(n => { const s = latest.stats.find(p=>p.name===n); cit.push(`<div class="award-sentence"><span class="text-gold font-black">${n}</span> earned the <span class="text-white font-bold underline">Hard Hat</span> with ${s.reb} reb, ${s.stl} stl, ${s.ast} ast, and only ${s.to} TO.</div>`); });
-            latest.windexWinners.forEach(n => { const s = latest.stats.find(p=>p.name===n); cit.push(`<div class="award-sentence"><span class="text-gold font-black">${n}</span> earned the <span class="text-white font-bold underline">Windex Bottle</span> for cleaning the glass with ${s.reb} rebounds.</div>`); });
-            if(latest.hustleWinner) cit.push(`<div class="award-sentence"><span class="text-gold font-black">${latest.hustleWinner}</span> earned the <span class="text-white font-bold underline">Hustle Award</span> for elite energy.</div>`);
-            if(latest.gritWinner) cit.push(`<div class="award-sentence"><span class="text-gold font-black">${latest.gritWinner}</span> earned the <span class="text-white font-bold underline">Grit Award</span> for determination.</div>`);
-            document.getElementById('narrativeAwardsArea').innerHTML = cit.join('') || '<div class="text-gray-600 italic">No awards for this game.</div>';
-
             const pT = {}; ROSTER.forEach(p => pT[p.name] = { a:0, t:0, r:0, gp:0 });
             let tAst = 0, tFgm = 0, tFta = 0, tFga = 0;
             h.forEach(g => g.stats.forEach(s => { pT[s.name].gp++; pT[s.name].a += s.ast; pT[s.name].t += s.to; pT[s.name].r += s.reb; tAst += s.ast; tFgm += (s.fg2m + s.fg3m); tFta += s.fta; tFga += (s.fg2a + s.fg3a); }));
+            
             const rbL = ROSTER.map(p => ({ n: p.name, v: pT[p.name].gp > 0 ? (pT[p.name].r / pT[p.name].gp).toFixed(1) : 0 })).sort((a,b)=>b.v-a.v).filter(x=>x.v>0);
             document.getElementById('reboundLeaders').innerHTML = rbL.slice(0,5).map(p => `<div class="flex justify-between p-2 rounded bg-gray-900 border border-gray-800"><span class="text-xs font-bold">${p.n}</span><span class="font-black text-white">${p.v}</span></div>`).join('');
+            
             document.getElementById('teamPhilo').innerHTML = `<div class="space-y-4"><div class="flex justify-between text-[10px] font-bold text-gray-400"><span>AST on FG% (Goal: 65%)</span> <span>${(tAst/tFgm*100 || 0).toFixed(0)}%</span></div><div class="h-2 bg-gray-800 rounded-full overflow-hidden"><div class="h-full bg-gold" style="width: ${tFgm>0?(tAst/tFgm*100):0}%"></div></div><div class="text-[10px] font-bold text-gray-500 uppercase">Ball Security (AST:TO): ${(tAst/h.reduce((a,b)=>a+b.stats.reduce((x,y)=>x+y.to,0),0) || 0).toFixed(2)}</div></div>`;
-            const allP = []; h.forEach(g => g.stats.forEach(s => allP.push({ n: s.name, pts: s.pts, reb: s.reb, date: g.date })));
+            
+            const allP = []; h.forEach(g => g.stats.forEach(s => allP.push({ n: s.name, pts: s.pts, reb: s.reb, date: g.date, opp: g.opp })));
             const findH = (k) => { let max = Math.max(...allP.map(o => o[k])); return allP.filter(o => o[k] === max && max > 0); };
             document.getElementById('honorRoll').innerHTML = [{t:'Points', k:'pts'}, {t:'Rebounds', k:'reb'}].map(s => `<div class="p-3 bg-gray-900 border border-gray-800 rounded-xl mb-2"><div class="text-[9px] text-gray-500 uppercase font-black mb-2">${s.t} Record</div>${findH(s.k).map(w => `<div class="flex justify-between items-baseline"><div><div class="text-sm font-black uppercase text-white">${w.n}</div><div class="text-[8px] text-gray-500 uppercase">${w.date}</div></div><div class="text-xl font-black text-gold">${w[s.k]}</div></div>`).join('')}</div>`).join('');
         }
@@ -307,9 +273,6 @@
             const posF = document.getElementById('posFilter').value;
             const pM = {}; ROSTER.forEach(r => pM[r.name] = { gp:0, pts:0, reb:0, ast:0, to:0, h:0, l:Infinity, pos:r.pos });
             h.forEach(g => g.stats.forEach(s => { const p = pM[s.name]; if (!p) return; p.gp++; p.pts += s.pts; p.reb += s.reb; p.ast += s.ast; p.to += s.to; if(s.pts > p.h) p.h = s.pts; if(s.pts < p.l) p.l = s.pts; }));
-            
-            document.getElementById('team-stats-grid').innerHTML = `<div class="bg-black border border-gray-800 p-6 rounded-2xl text-center"><div class="text-[9px] uppercase text-gray-500 mb-1">Team PPG</div><div class="text-2xl font-black italic">${(Object.values(pM).reduce((a,b)=>a+b.pts,0)/h.length || 0).toFixed(1)}</div></div>`;
-            
             let html = `<table class="w-full text-left text-[10px]"><thead class="bg-gray-950 text-gray-500 uppercase"><tr><th class="p-4">Player</th><th>POS</th><th>GP</th><th>PPG</th><th>RPG</th><th>APG</th><th>TOPG</th><th>H/L</th></tr></thead><tbody>`;
             for(let n in pM) { 
                 const p = pM[n]; if(p.gp === 0) continue; 
@@ -322,17 +285,10 @@
         function renderGameLog() {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const search = document.getElementById('logSearch').value.toLowerCase();
-            const awardF = document.getElementById('logAwardFilter').value;
             const area = document.getElementById('gameLogArea');
             if(h.length === 0) return area.innerHTML = `<div class="text-center py-20 text-gray-600 uppercase text-xs">No entries</div>`;
-            
-            const filtered = h.filter(g => {
-                const matchSearch = g.opp.toLowerCase().includes(search);
-                const matchAward = awardF === 'all' || (awardF === 'hh' && g.hardHatWinners.length > 0) || (awardF === 'win' && g.windexWinners.length > 0);
-                return matchSearch && matchAward;
-            });
-
-            area.innerHTML = filtered.map((g, idx) => `<div class="bg-black border border-gray-800 rounded-xl overflow-hidden shadow-lg mb-4"><div class="bg-gray-900 p-4 flex justify-between items-center border-b border-gray-800"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded bg-gray-950 border border-gray-800 flex items-center justify-center font-black text-xl ${g.result==='W'?'text-gold':'text-red-600'}">${g.result||'?'}</div><div><span class="text-[9px] text-gray-500 font-bold block uppercase">${g.date}</span><span class="text-xl font-black italic uppercase">Eagles ${g.teamScore}, ${g.opp} ${g.oppScore||0}</span></div></div><button onclick="openEditStats(${h.indexOf(g)})" class="text-white uppercase text-[8px] font-bold bg-gray-800 px-3 py-1 rounded">Edit Box Score</button></div><div class="p-3 bg-gray-950 flex flex-wrap gap-2">${g.hardHatWinners?.map(w=>`<span class="award-badge bg-orange-600 text-black">👷 ${w}</span>`).join('')||''}${g.windexWinners?.map(w=>`<span class="award-badge bg-blue-500 text-black">🧽 ${w}</span>`).join('')||''}${g.hustleWinner?`<span class="award-badge bg-yellow-500 text-black">⚡ ${g.hustleWinner}</span>`:''}${g.gritWinner?`<span class="award-badge bg-red-800 text-white">🧱 ${g.gritWinner}</span>`:''}</div></div>`).join('');
+            const filtered = h.filter(g => g.opp.toLowerCase().includes(search));
+            area.innerHTML = filtered.map((g, idx) => `<div class="bg-black border border-gray-800 rounded-xl overflow-hidden shadow-lg mb-4"><div class="bg-gray-900 p-4 flex justify-between items-center border-b border-gray-800"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded bg-gray-950 border border-gray-800 flex items-center justify-center font-black text-xl ${g.result==='W'?'text-gold':'text-red-600'}">${g.result||'?'}</div><div><span class="text-[9px] text-gray-500 font-bold block uppercase">${g.date}</span><span class="text-xl font-black italic uppercase">Eagles ${g.teamScore}, ${g.opp} ${g.oppScore||0}</span></div></div><button onclick="openEditStats(${h.indexOf(g)})" class="text-white uppercase text-[8px] font-bold bg-gray-800 px-3 py-1 rounded">Edit Stats</button></div></div>`).join('');
         }
 
         function renderPlayerProfile() {
@@ -344,7 +300,7 @@
             const s = { 
                 gp:0, pts:0, reb:0, ast:0, to:0, stl:0, ftm:0, fta:0, fg2m:0, fg2a:0, fg3m:0, fg3a:0,
                 highs: { fgm: {v:0,g:""}, fga: {v:0,g:""}, fg3m: {v:0,g:""}, fg3a: {v:0,g:""}, ftm: {v:0,g:""}, fta: {v:0,g:""}, reb: {v:0,g:""}, ast: {v:0,g:""}, stl: {v:0,g:""}, to: {v:0,g:""}, pts: {v:0,g:""} },
-                awards:[], trend:[], pos:"" 
+                trend:[], pos:"" 
             };
 
             const sortedGames = [...h].sort((a,b) => new Date(a.date) - new Date(b.date));
@@ -356,21 +312,15 @@
                     s.gp++; s.pts += p.pts; s.reb += p.reb; s.ast += p.ast; s.to += p.to; s.stl += p.stl;
                     s.ftm += p.ftm; s.fta += p.fta; s.fg2m += p.fg2m; s.fg2a += p.fg2a; s.fg3m += p.fg3m; s.fg3a += p.fg3a;
                     s.pos = p.pos;
-
                     checkH('pts', p.pts, g); checkH('reb', p.reb, g); checkH('ast', p.ast, g); checkH('stl', p.stl, g); checkH('to', p.to, g);
                     checkH('fgm', p.fg2m + p.fg3m, g); checkH('fga', p.fg2a + p.fg3a, g);
                     checkH('fg3m', p.fg3m, g); checkH('fg3a', p.fg3a, g);
                     checkH('ftm', p.ftm, g); checkH('fta', p.fta, g);
-
-                    if(g.hardHatWinners?.includes(name)) s.awards.push({t:'Hard Hat', i:'👷', d:g.date, o:g.opp});
-                    if(g.windexWinners?.includes(name)) s.awards.push({t:'Windex Bottle', i:'🧽', d:g.date, o:g.opp});
-                    if(g.hustleWinner === name) s.awards.push({t:'Hustle Award', i:'⚡', d:g.date, o:g.opp});
-                    if(g.gritWinner === name) s.awards.push({t:'Grit Award', i:'🧱', d:g.date, o:g.opp});
                     s.trend.push({o: g.opp, v: p.pts});
                 }
             });
 
-            if(s.gp === 0) { area.innerHTML = `<div class="text-center py-20 text-gray-600">No data found for this player.</div>`; return; }
+            if(s.gp === 0) { area.innerHTML = `<div class="text-center py-20 text-gray-600">No data found.</div>`; return; }
 
             const pct = (m, a) => a > 0 ? ((m/a)*100).toFixed(1) + '%' : '0.0%';
             area.innerHTML = `
@@ -379,54 +329,27 @@
                         <div class="text-gold text-[10px] font-black uppercase mb-1">${s.pos} | Eagles Varsity</div>
                         <h2 class="text-2xl font-black uppercase text-white mb-4">${name}</h2>
                         <div class="grid grid-cols-3 gap-1">
-                            <div class="bg-gray-950 p-2 rounded border border-gray-900">
-                                <div class="text-[7px] text-gray-500 uppercase font-bold">Total</div>
-                                <div class="text-base font-black text-gold">${s.pts}</div>
-                            </div>
-                            <div class="bg-gray-950 p-2 rounded border border-gray-900">
-                                <div class="text-[7px] text-gray-500 uppercase font-bold">PPG</div>
-                                <div class="text-base font-black text-white">${(s.pts/s.gp).toFixed(1)}</div>
-                            </div>
-                            <div class="bg-gray-950 p-2 rounded border border-gray-900">
-                                <div class="text-[7px] text-gray-500 uppercase font-bold">RPG</div>
-                                <div class="text-base font-black text-white">${(s.reb/s.gp).toFixed(1)}</div>
-                            </div>
+                            <div class="bg-gray-950 p-2 rounded border border-gray-900"><div class="text-[7px] text-gray-500 uppercase font-bold">TOTAL</div><div class="text-base font-black text-gold">${s.pts}</div></div>
+                            <div class="bg-gray-950 p-2 rounded border border-gray-900"><div class="text-[7px] text-gray-500 uppercase font-bold">PPG</div><div class="text-base font-black text-white">${(s.pts/s.gp).toFixed(1)}</div></div>
+                            <div class="bg-gray-950 p-2 rounded border border-gray-900"><div class="text-[7px] text-gray-500 uppercase font-bold">RPG</div><div class="text-base font-black text-white">${(s.reb/s.gp).toFixed(1)}</div></div>
                         </div>
                     </div>
                     <div class="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
-                        ${[{l:'Season Hard Hats',v:s.awards.filter(x=>x.t==='Hard Hat').length},{l:'Season Windex',v:s.awards.filter(x=>x.t==='Windex Bottle').length},{l:'Season Energy',v:s.awards.filter(x=>x.t==='Hustle Award').length},{l:'Season Grit',v:s.awards.filter(x=>x.t==='Grit Award').length}].map(x => `<div class="profile-stat-box"><div class="text-[8px] text-gray-500 uppercase font-bold mb-1">${x.l}</div><div class="text-3xl font-black text-white">${x.v}</div></div>`).join('')}
+                        ${[{l:'2PT%',v:pct(s.fg2m,s.fg2a)},{l:'3PT%',v:pct(s.fg3m,s.fg3a)},{l:'FT%',v:pct(s.ftm,s.fta)},{l:'AST:TO',v:(s.ast/s.to||0).toFixed(1)}].map(x => `<div class="profile-stat-box"><div class="text-[8px] text-gray-500 uppercase font-bold mb-1">${x.l}</div><div class="text-3xl font-black text-white">${x.v}</div></div>`).join('')}
                     </div>
                 </div>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="bg-black border border-gray-800 p-6 rounded-3xl">
-                        <h3 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Efficiency Metrics</h3>
-                        <div class="space-y-2">
-                            <div class="flex justify-between p-2 rounded border border-gray-900 bg-gray-950"><span>2PT %</span><span class="font-black text-white">${pct(s.fg2m, s.fg2a)}</span></div>
-                            <div class="flex justify-between p-2 rounded border border-gray-900 bg-gray-950"><span>3PT %</span><span class="font-black text-gold">${pct(s.fg3m, s.fg3a)}</span></div>
-                            <div class="flex justify-between p-2 rounded border border-gray-900 bg-gray-950"><span>FT %</span><span class="font-black text-white">${pct(s.ftm, s.fta)}</span></div>
-                            <div class="flex justify-between p-2 rounded border border-gray-900 bg-gray-950"><span>AST:TO Ratio</span><span class="font-black text-white">${(s.ast/s.to || 0).toFixed(1)}</span></div>
+                        <h3 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Season Highs (Single Game)</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                            ${Object.entries(s.highs).map(([k, d]) => `<div class="bg-gray-950 border border-gray-800 p-2 rounded text-center"><div class="text-[7px] uppercase font-bold text-gray-500 mb-1">${k.toUpperCase()}</div><div class="text-lg font-black text-white">${d.v}</div><div class="high-context">${d.g || '-'}</div></div>`).join('')}
                         </div>
                     </div>
-
-                    <div class="lg:col-span-2 bg-black border border-gray-800 p-6 rounded-3xl">
-                        <h3 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Season High Water Marks</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                            ${Object.entries(s.highs).map(([key, data]) => `
-                                <div class="bg-gray-950 border border-gray-900 p-2 rounded text-center">
-                                    <div class="text-[7px] uppercase font-bold text-gray-500 mb-1">${key.toUpperCase()}</div>
-                                    <div class="text-lg font-black text-white">${data.v}</div>
-                                    <div class="high-context">${data.g || '-'}</div>
-                                </div>`).join('')}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-black border border-gray-800 p-6 rounded-3xl h-64"><h3 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Individual Scoring Trend</h3><canvas id="profileTrendChart"></canvas></div>`;
+                    <div class="bg-black border border-gray-800 p-6 rounded-3xl h-64"><h3 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Scoring Trend</h3><canvas id="profileTrendChart"></canvas></div>
+                </div>`;
             
             if(profileChart) profileChart.destroy();
-            const ctx = document.getElementById('profileTrendChart').getContext('2d');
-            profileChart = new Chart(ctx, { type: 'line', data: { labels: s.trend.map(t => t.o), datasets: [{ label: 'Points', data: s.trend.map(t => t.v), borderColor: '#FFB81C', backgroundColor: 'rgba(255,184,28,0.1)', fill: true, tension: 0.4 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#222' } }, x: { grid: { display: false }, ticks: { color: '#666', font: { size: 8 } } } } } });
+            profileChart = new Chart(document.getElementById('profileTrendChart').getContext('2d'), { type: 'line', data: { labels: s.trend.map(t => t.o), datasets: [{ label: 'Points', data: s.trend.map(t => t.v), borderColor: '#FFB81C', backgroundColor: 'rgba(255,184,28,0.1)', fill: true, tension: 0.4 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#222' } }, x: { grid: { display: false }, ticks: { font: { size: 8 } } } } } });
         }
 
         window.openEditStats = function(idx) {
@@ -435,21 +358,17 @@
             document.getElementById('editModal').classList.remove('hidden');
             let html = `<div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-950 border-b border-gray-800">
                     <div><label class="text-[10px] text-gold font-bold uppercase">Opp Score</label><input type="number" id="editOppScore" value="${g.oppScore}" class="w-full bg-black border border-gray-700 p-2 rounded text-white text-xs"></div>
-                    <div><label class="text-[10px] text-gold font-bold uppercase">Hustle Winner</label><select id="editHustle" class="w-full bg-gray-900 border border-gray-800 p-2 rounded text-white text-xs"><option value="">None</option>${ROSTER.map(p=>`<option value="${p.name}" ${g.hustleWinner===p.name?'selected':''}>${p.name}</option>`).join('')}</select></div>
-                    <div><label class="text-[10px] text-gold font-bold uppercase">Grit Winner</label><select id="editGrit" class="w-full bg-gray-900 border border-gray-800 p-2 rounded text-white text-xs"><option value="">None</option>${ROSTER.map(p=>`<option value="${p.name}" ${g.gritWinner===p.name?'selected':''}>${p.name}</option>`).join('')}</select></div>
                 </div>
                 <div class="p-4 overflow-x-auto"><table class="w-full text-left text-xs"><thead><tr class="text-gold text-[9px] uppercase border-b border-gray-800"><th class="p-2 sticky-col">Player</th>${STAT_FIELDS.map(f=>`<th class="p-1 text-center">${f.toUpperCase()}</th>`).join('')}</tr></thead>
                         <tbody>${g.stats.map(s => `<tr><td class="p-2 font-bold text-gray-300 sticky-col">${s.name}</td>${STAT_FIELDS.map(f=>`<td class="p-1 text-center"><input type="number" data-edit-player="${s.name}" data-edit-stat="${f}" value="${s[f]||0}" class="stat-input"></td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
             document.getElementById('editModalBody').innerHTML = html;
             document.getElementById('saveEditBtn').onclick = () => {
-                g.oppScore = parseInt(document.getElementById('editOppScore').value)||0; g.hustleWinner = document.getElementById('editHustle').value; g.gritWinner = document.getElementById('editGrit').value;
+                g.oppScore = parseInt(document.getElementById('editOppScore').value)||0;
                 let tP = 0; g.stats.forEach(s => { STAT_FIELDS.forEach(f => { const i = document.querySelector(`[data-edit-player="${s.name}"][data-edit-stat="${f}"]`); if(i) s[f] = parseInt(i.value)||0; }); s.pts = (s.fg2m*2)+(s.fg3m*3)+s.ftm; tP += s.pts; });
                 g.teamScore = tP; g.result = tP > g.oppScore ? 'W' : (tP < g.oppScore ? 'L' : 'T');
-                const winz = calculateAwardWinners(g.stats, 'auto', 'auto'); g.windexWinners = winz.windex; g.hardHatWinners = winz.hardHat;
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(h)); alert("Box Score Corrected!"); closeEditModal(); renderGameLog();
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(h)); alert("Updated!"); closeEditModal(); renderGameLog();
             };
         };
-
         function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
         function clearData() { if(confirm("Coach, reset data?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
 
@@ -461,24 +380,24 @@
                     const text = e.target.result; const rows = text.replace(/\r/g, '').split('\n').filter(r => r.trim() !== "");
                     const headers = rows[0].toLowerCase().split(',').map(h => h.trim());
                     const gM = {};
-                    const map = { 'date':'date', 'opponent':'opp', 'oppscore':'oppScore', 'player':'name', '2pm':'fg2m', '2pa':'fg2a', '3pm':'fg3m', '3pa':'fg3a', 'ftm':'ftm', 'fta':'fta', 'reb':'reb', 'ast':'ast', 'stl':'stl', 'to':'to' };
+                    const map = { 'date':'date', 'opponent':'opp', 'oppscore':'oppScore', 'player':'name', '2pm':'fg2m', '2pa':'fg2a', '3pm':'fg3m', '3pa':'fg3a', 'ftm':'ftm', 'fta':'fta', 'reb':'reb', 'ast':'ast', 'stl':'stl', 'to':'to', 'fouls':'fouls' };
                     for (let i = 1; i < rows.length; i++) {
                         const data = rows[i].split(',').map(d => d.trim()); const entry = {}; headers.forEach((h, idx) => { if (map[h]) entry[map[h]] = data[idx]; });
                         const key = `${entry.date}_${entry.opp}`; if (!gM[key]) gM[key] = { date: entry.date, opp: entry.opp, oppScore: parseInt(entry.oppScore)||0, stats: [] };
-                        const ps = { name: entry.name, fg2m: parseInt(entry.fg2m)||0, fg2a: parseInt(entry.fg2a)||0, fg3m: parseInt(entry.fg3m)||0, fg3a: parseInt(entry.fg3a)||0, ftm: parseInt(entry.ftm)||0, fta: parseInt(entry.fta)||0, reb: parseInt(entry.reb)||0, ast: parseInt(entry.ast)||0, stl: parseInt(entry.stl)||0, to: parseInt(entry.to)||0 };
-                        const rP = ROSTER.find(r=>r.name===ps.name); ps.pos = rP ? rP.pos : "G"; ps.pts = (ps.fg2m*2)+(ps.fg3m*3)+ps.ftm; ps.hardHatScore = (ps.reb+ps.stl+ps.ast)-ps.to; gM[key].stats.push(ps);
+                        const ps = { name: entry.name, fg2m: parseInt(entry.fg2m)||0, fg2a: parseInt(entry.fg2a)||0, fg3m: parseInt(entry.fg3m)||0, fg3a: parseInt(entry.fg3a)||0, ftm: parseInt(entry.ftm)||0, fta: parseInt(entry.fta)||0, reb: parseInt(entry.reb)||0, ast: parseInt(entry.ast)||0, stl: parseInt(entry.stl)||0, to: parseInt(entry.to)||0, fouls: parseInt(entry.fouls)||0 };
+                        const rP = ROSTER.find(r=>r.name===ps.name); ps.pos = rP ? rP.pos : "G"; ps.pts = (ps.fg2m*2)+(ps.fg3m*3)+ps.ftm; gM[key].stats.push(ps);
                     }
                     const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-                    Object.values(gM).forEach(g => { g.teamScore = g.stats.reduce((a,c)=>a+c.pts,0); g.result = g.teamScore > g.oppScore ? 'W' : (g.teamScore < g.oppScore ? 'L' : 'T'); const winz = calculateAwardWinners(g.stats, 'auto', 'auto'); g.windexWinners = winz.windex; g.hardHatWinners = winz.hardHat; h.push(g); });
+                    Object.values(gM).forEach(g => { g.teamScore = g.stats.reduce((a,c)=>a+c.pts,0); g.result = g.teamScore > g.oppScore ? 'W' : (g.teamScore < g.oppScore ? 'L' : 'T'); h.push(g); });
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(h)); alert("Import complete!"); location.reload();
-                } catch (err) { alert("Error importing CSV. Ensure columns match."); }
+                } catch (err) { alert("Error importing CSV."); }
             }; reader.readAsText(file);
         }
         function exportToCSV() {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            let c = "Date,Opponent,OppScore,Player,2PM,2PA,3PM,3PA,FTM,FTA,REB,AST,STL,TO,PTS\n";
-            h.forEach(g => g.stats.forEach(s => c += `${g.date},${g.opp},${g.oppScore},${s.name},${s.fg2m},${s.fg2a},${s.fg3m},${s.fg3a},${s.ftm},${s.fta},${s.reb},${s.ast},${s.stl},${s.to},${s.pts}\n`));
-            const b = new Blob([c], {type:'text/csv'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'Eagles_Stats_V17.csv'; a.click();
+            let c = "Date,Opponent,OppScore,Player,2PM,2PA,3PM,3PA,FTM,FTA,REB,AST,STL,TO,FOULS,PTS\n";
+            h.forEach(g => g.stats.forEach(s => c += `${g.date},${g.opp},${g.oppScore},${s.name},${s.fg2m},${s.fg2a},${s.fg3m},${s.fg3a},${s.ftm},${s.fta},${s.reb},${s.ast},${s.stl},${s.to},${s.fouls},${s.pts}\n`));
+            const b = new Blob([c], {type:'text/csv'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'Eagles_Basketball_Stats.csv'; a.click();
         }
     </script>
 </body>
