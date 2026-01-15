@@ -1,160 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lady Hoops Stat Tracker</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 font-sans">
-    <div class="max-w-6xl mx-auto p-6">
-        <header class="mb-8 flex justify-between items-center bg-blue-900 text-white p-6 rounded-lg shadow-lg">
-            <h1 class="text-3xl font-bold italic">LADY HOOPS | Season Stats</h1>
-            <button onclick="toggleView()" id="viewBtn" class="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded font-bold">Switch to Season Summary</button>
-        </header>
+const players = [
+    {name: "Brittney Tang", num: 1}, {name: "Kylie Mulcahy", num: 2},
+    {name: "Mikayla Sanders", num: 3}, {name: "Lexi Guild", num: 4},
+    {name: "Natasha Mistry", num: 5}, {name: "Reese Jackson", num: 10},
+    {name: "Alexa Troiano", num: 15}, {name: "Bela Smith", num: 20},
+    {name: "Christina Lisack", num: 22}, {name: "Olivia Dozier", num: 23},
+    {name: "Gia Comey", num: 32}, {name: "Dani Cardona", num: 34},
+    {name: "Olivia Fraser", num: 44}
+];
 
-        <div id="gameEntry">
-            <div class="bg-white p-6 rounded-lg shadow mb-6">
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <input type="date" id="gameDate" class="border p-2 rounded">
-                    <input type="text" id="opponent" placeholder="Opponent" class="border p-2 rounded">
-                </div>
-                
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-gray-200 text-xs">
-                                <th class="p-2">Player</th>
-                                <th class="p-2">2PM</th><th class="p-2">2PA</th>
-                                <th class="p-2">3PM</th><th class="p-2">3PA</th>
-                                <th class="p-2">FTM</th><th class="p-2">FTA</th>
-                                <th class="p-2">AST</th><th class="p-2">STL</th>
-                                <th class="p-2">REB</th><th class="p-2">TO</th>
-                            </tr>
-                        </thead>
-                        <tbody id="statRows">
-                            </tbody>
-                    </table>
-                </div>
-                <button onclick="saveGame()" class="mt-6 w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700">Save Game Stats</button>
-            </div>
-        </div>
+function calculateSeasonStats() {
+    const history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
+    const statsMeta = {}; // To store totals, highs, and lows
 
-        <div id="summaryDashboard" class="hidden">
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h2 class="text-2xl font-bold mb-4">Season Leaders (Averages)</h2>
-                <div id="leaderboard" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"></div>
-                <div id="seasonTableContainer" class="overflow-x-auto"></div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const players = [
-            {name: "Brittney Tang", num: 1}, {name: "Kylie Mulcahy", num: 2},
-            {name: "Mikayla Sanders", num: 3}, {name: "Lexi Guild", num: 4},
-            {name: "Natasha Mistry", num: 5}, {name: "Reese Jackson", num: 10},
-            {name: "Alexa Troiano", num: 15}, {name: "Bela Smith", num: 20},
-            {name: "Christina Lisack", num: 22}, {name: "Olivia Dozier", num: 23},
-            {name: "Gia Comey", num: 32}, {name: "Dani Cardona", num: 34},
-            {name: "Olivia Fraser", num: 44}
-        ];
-
-        // Initialize Table Rows
-        const tbody = document.getElementById('statRows');
-        players.forEach(p => {
-            const row = `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="p-2 font-bold text-sm">${p.name} (#${p.num})</td>
-                    <td><input type="number" data-player="${p.name}" data-stat="fg2m" class="w-12 border rounded p-1"></td>
-                    <td><input type="number" data-player="${p.name}" data-stat="fg2a" class="w-12 border rounded p-1"></td>
-                    <td><input type="number" data-player="${p.name}" data-stat="fg3m" class="w-12 border rounded p-1"></td>
-                    <td><input type="number" data-player="${p.name}" data-stat="fg3a" class="w-12 border rounded p-1"></td>
-                    <td><input type="number" data-player="${p.name}" data-stat="ftm" class="w-12 border rounded p-1"></td>
-                    <td><input type="number" data-player="${p.name}" data-stat="fta" class="w-12 border rounded p-1"></td>
-                    <td><input type="number" data-player="${p.name}" data-stat="ast" class="w-12 border rounded p-1"></td>
-                    <td><input type="number" data-player="${p.name}" data-stat="stl" class="w-12 border rounded p-1"></td>
-                    <td><input type="number" data-player="${p.name}" data-stat="reb" class="w-12 border rounded p-1"></td>
-                    <td><input type="number" data-player="${p.name}" data-stat="to" class="w-12 border rounded p-1"></td>
-                </tr>`;
-            tbody.innerHTML += row;
+    // Initialize meta-structure for all stats on your sheet
+    const categories = ['pts', 'reb', 'ast', 'stl', 'to', 'fouls'];
+    
+    players.forEach(p => {
+        statsMeta[p.name] = { gp: 0 };
+        categories.forEach(cat => {
+            statsMeta[p.name][cat] = { total: 0, high: 0, low: Infinity };
         });
+    });
 
-        function saveGame() {
-            const gameData = {
-                date: document.getElementById('gameDate').value,
-                opponent: document.getElementById('opponent').value,
-                stats: []
-            };
-
-            players.forEach(p => {
-                const pStats = { name: p.name };
-                document.querySelectorAll(`[data-player="${p.name}"]`).forEach(input => {
-                    pStats[input.dataset.stat] = parseInt(input.value) || 0;
-                });
-                // Calculate total points
-                pStats.pts = (pStats.fg2m * 2) + (pStats.fg3m * 3) + pStats.ftm;
-                gameData.stats.push(pStats);
+    history.forEach(game => {
+        game.stats.forEach(s => {
+            const p = statsMeta[s.name];
+            p.gp++;
+            categories.forEach(cat => {
+                const val = s[cat] || 0;
+                p[cat].total += val;
+                if (val > p[cat].high) p[cat].high = val;
+                if (val < p[cat].low) p[cat].low = val;
             });
+        });
+    });
 
-            const history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
-            history.push(gameData);
-            localStorage.setItem('gameHistory', JSON.stringify(history));
-            alert("Game saved successfully!");
-            location.reload();
-        }
+    renderSummaryTable(statsMeta);
+}
 
-        function toggleView() {
-            const entry = document.getElementById('gameEntry');
-            const summary = document.getElementById('summaryDashboard');
-            const btn = document.getElementById('viewBtn');
-            
-            if (entry.classList.contains('hidden')) {
-                entry.classList.remove('hidden');
-                summary.classList.add('hidden');
-                btn.innerText = "Switch to Season Summary";
-            } else {
-                entry.classList.add('hidden');
-                summary.classList.remove('hidden');
-                btn.innerText = "Switch to Game Entry";
-                calculateSeasonStats();
-            }
-        }
+function renderSummaryTable(data) {
+    const container = document.getElementById('seasonTableContainer');
+    let html = `
+        <h3 class="text-xl font-bold mt-8 mb-4 text-blue-900">Season Highs & Lows</h3>
+        <table class="w-full text-xs text-left border-collapse bg-white shadow-sm">
+            <thead>
+                <tr class="bg-blue-900 text-white">
+                    <th class="p-2 border">Player</th>
+                    <th class="p-2 border">Points (H/L)</th>
+                    <th class="p-2 border">Rebounds (H/L)</th>
+                    <th class="p-2 border">Assists (H/L)</th>
+                    <th class="p-2 border">Steals (H/L)</th>
+                    <th class="p-2 border">Turnovers (H/L)</th>
+                </tr>
+            </thead>
+            <tbody>`;
 
-        function calculateSeasonStats() {
-            const history = JSON.parse(localStorage.getItem('gameHistory') || '[]');
-            const totals = {};
-
-            history.forEach(game => {
-                game.stats.forEach(s => {
-                    if (!totals[s.name]) totals[s.name] = { gp: 0, pts: 0, reb: 0, ast: 0, stl: 0 };
-                    totals[s.name].gp++;
-                    totals[s.name].pts += s.pts;
-                    totals[s.name].reb += s.reb;
-                    totals[s.name].ast += s.ast;
-                    totals[s.name].stl += s.stl;
-                });
-            });
-
-            const container = document.getElementById('seasonTableContainer');
-            let tableHtml = `<table class="w-full text-left border-collapse">
-                <thead><tr class="bg-gray-800 text-white">
-                    <th class="p-2">Player</th><th>GP</th><th>PPG</th><th>RPG</th><th>APG</th><th>SPG</th>
-                </tr></thead><tbody>`;
-
-            for (let name in totals) {
-                const t = totals[name];
-                tableHtml += `<tr class="border-b">
-                    <td class="p-2 font-bold">${name}</td>
-                    <td>${t.gp}</td>
-                    <td>${(t.pts/t.gp).toFixed(1)}</td>
-                    <td>${(t.reb/t.gp).toFixed(1)}</td>
-                    <td>${(t.ast/t.gp).toFixed(1)}</td>
-                    <td>${(t.stl/t.gp).toFixed(1)}</td>
-                </tr>`;
-            }
-            container.innerHTML = tableHtml + `</tbody></table>`;
-        }
-    </script>
-</body>
-</html>
+    for (let name in data) {
+        const p = data[name];
+        if (p.gp === 0) continue;
+        
+        html += `
+            <tr class="border-b">
+                <td class="p-2 font-bold border bg-gray-50">${name}</td>
+                <td class="p-2 border text-center"><span class="text-green-600 font-bold">${p.pts.high}</span> / <span class="text-red-600">${p.pts.low}</span></td>
+                <td class="p-2 border text-center"><span class="text-green-600 font-bold">${p.reb.high}</span> / <span class="text-red-600">${p.reb.low}</span></td>
+                <td class="p-2 border text-center"><span class="text-green-600 font-bold">${p.ast.high}</span> / <span class="text-red-600">${p.ast.low}</span></td>
+                <td class="p-2 border text-center"><span class="text-green-600 font-bold">${p.stl.high}</span> / <span class="text-red-600">${p.stl.low}</span></td>
+                <td class="p-2 border text-center"><span class="text-red-600 font-bold">${p.to.high}</span> / <span class="text-green-600">${p.to.low}</span></td>
+            </tr>`;
+    }
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
