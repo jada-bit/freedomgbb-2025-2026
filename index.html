@@ -114,7 +114,7 @@
         </main>
 
         <!-- COACH'S CLIPBOARD -->
-        <main id="view-clipboard" class="hidden p-4 md:p-8 space-y-8">
+        <main id="view-clipboard" class="hidden p-4 md:p-8 space-y-8 animate-fadeIn">
             <!-- Team Overview Statistics -->
             <div id="teamOverviewGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
 
@@ -136,7 +136,7 @@
                     <div id="reboundLeaders" class="space-y-2"></div>
                 </div>
                 <div class="clipboard-card p-6 rounded-2xl">
-                    <h3 class="text-lg font-black uppercase italic mb-4">Season Best Games</h3>
+                    <h3 class="text-lg font-black uppercase italic mb-4">Season Records</h3>
                     <div id="honorRoll" class="space-y-4"></div>
                 </div>
             </div>
@@ -161,7 +161,7 @@
 
         <!-- SETTINGS -->
         <main id="view-settings" class="hidden p-4 md:p-8 space-y-8">
-            <div class="bg-black border border-gray-800 p-8 rounded-3xl max-w-2xl mx-auto">
+            <div class="bg-black border border-gray-800 p-8 rounded-3xl max-w-2xl mx-auto shadow-2xl">
                 <h2 class="text-2xl font-black text-gold uppercase italic mb-8 border-b border-gray-800 pb-4">Settings</h2>
                 <div class="flex flex-wrap gap-4 mb-12">
                     <button onclick="exportToCSV()" class="bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-xl font-bold uppercase text-xs border border-gray-700 transition-all">Download Season CSV</button>
@@ -171,7 +171,7 @@
             </div>
         </main>
 
-        <!-- EDIT BOX SCORE MODAL -->
+        <!-- EDIT MODAL -->
         <div id="editModal" class="hidden fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-4">
             <div class="bg-black border border-gray-800 w-full max-w-6xl rounded-3xl shadow-2xl flex flex-col max-h-[95vh]">
                 <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-gray-900 rounded-t-3xl">
@@ -188,18 +188,19 @@
     </div>
 
     <script>
+        // Updated Roster with Custom Positions
         const ROSTER = [
             {id: 1, name: "Brittney Tang", pos: "G"}, {id: 2, name: "Kylie Mulcahy", pos: "G"},
-            {id: 3, name: "Mikayla Sanders", pos: "G"}, {id: 4, name: "Lexi Guild", pos: "G"},
-            {id: 5, name: "Natasha Mistry", pos: "G"}, {id: 10, name: "Reese Jackson", pos: "F"},
-            {id: 15, name: "Alexa Troiano", pos: "F"}, {id: 20, name: "Bela Smith", pos: "F"},
-            {id: 22, name: "Christina Lisack", pos: "F"}, {id: 23, name: "Olivia Dozier", pos: "F"},
-            {id: 32, name: "Gia Comey", pos: "C"}, {id: 34, name: "Dani Cardona", pos: "C"},
-            {id: 44, name: "Olivia Fraser", pos: "C"}
+            {id: 3, name: "Mikayla Sanders", pos: "PG"}, {id: 4, name: "Lexi Guild", pos: "G"},
+            {id: 5, name: "Natasha Mistry", pos: "PG"}, {id: 10, name: "Reese Jackson", pos: "F"},
+            {id: 15, name: "Alexa Troiano", pos: "C"}, {id: 20, name: "Bela Smith", pos: "F"},
+            {id: 22, name: "Christina Lisack", pos: "PG/G"}, {id: 23, name: "Olivia Dozier", pos: "G/F"},
+            {id: 32, name: "Gia Comey", pos: "F"}, {id: 34, name: "Dani Cardona", pos: "C"},
+            {id: 44, name: "Olivia Fraser", pos: "G/F"}
         ];
 
         const STAT_FIELDS = ['fg2m','fg2a','fg3m','fg3a','ftm','fta','reb','ast','stl','to','fouls'];
-        const STORAGE_KEY = 'eagleStatsFinal_v13';
+        const STORAGE_KEY = 'eagleStatsFinal_v15';
 
         window.onload = () => {
             const entryTable = document.getElementById('rosterRows');
@@ -269,7 +270,6 @@
             if (h.length === 0) return;
             const latest = h[h.length - 1];
             
-            // Season Averages Logic
             let wins = h.filter(g => g.result === 'W').length;
             let totalPts = h.reduce((a,b)=>a+b.teamScore,0);
             let totalOppPts = h.reduce((a,b)=>a+b.oppScore,0);
@@ -281,7 +281,6 @@
                 <div class="bg-black border border-gray-800 p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Opponent PPG</div><div class="text-2xl font-black italic text-red-500">${(totalOppPts/h.length).toFixed(1)}</div></div>
                 <div class="bg-black border border-gray-800 p-4 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Team RPG</div><div class="text-2xl font-black italic">${(totalReb/h.length).toFixed(1)}</div></div>`;
 
-            // Narrative Awards Logic
             const citations = [];
             latest.hardHatWinners.forEach(name => {
                 const s = latest.stats.find(p => p.name === name);
@@ -296,7 +295,6 @@
             
             document.getElementById('narrativeAwardsArea').innerHTML = citations.join('') || '<div class="text-gray-600">No awards recorded for this game.</div>';
 
-            // Other Clipboard metrics
             const pTotals = {}; ROSTER.forEach(p => pTotals[p.name] = { a:0, t:0, r:0, gp:0 });
             let tAst = 0, tFgm = 0, tFta = 0, tFga = 0;
             h.forEach(g => g.stats.forEach(s => { 
@@ -324,7 +322,7 @@
             let html = `<table class="w-full text-left text-[10px]"><thead class="bg-gray-950 text-gray-500 uppercase"><tr><th class="p-4">Player</th><th>POS</th><th>GP</th><th>PPG</th><th>RPG</th><th>APG</th><th>TOPG</th><th>H/L</th></tr></thead><tbody>`;
             for(let n in pMap) {
                 const p = pMap[n]; if(p.gp === 0) continue;
-                html += `<tr class="border-b border-gray-900"><td class="p-4 font-bold text-gold">${n}</td><td><span class="text-gray-600 font-black">${p.pos}</span></td><td>${p.gp}</td><td>${(p.pts/p.gp).toFixed(1)}</td><td>${(p.reb/p.gp).toFixed(1)}</td><td>${(p.ast/p.gp).toFixed(1)}</td><td>${(p.to/p.gp).toFixed(1)}</td><td><span class="text-green-500">${p.h}</span> / <span class="text-red-500">${p.l}</span></td></tr>`;
+                html += `<tr class="border-b border-gray-900"><td class="p-4 font-bold text-gold">${n}</td><td><span class="text-gray-600 font-black">${p.pos}</span></td><td>${p.gp}</td><td>${(p.pts/p.gp).toFixed(1)}</td><td>${(p.reb/p.gp).toFixed(1)}</td><td>${(p.ast/p.gp).toFixed(1)}</td><td>${(p.to/p.gp).toFixed(1)}</td><td><span class="text-green-500">${p.h}</span> / <span class="text-red-500">${p.l===Infinity?0:p.l}</span></td></tr>`;
             }
             document.getElementById('summaryTableArea').innerHTML = html + `</tbody></table>`;
         }
@@ -355,14 +353,36 @@
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const name = document.getElementById('profilePicker').value;
             const area = document.getElementById('playerProfileArea');
-            if(!name) { area.innerHTML = `<div class="text-center py-10 text-gray-600">Select an Eagle...</div>`; return; }
+            if(!name) { area.innerHTML = `<div class="text-center py-10 text-gray-600 uppercase text-xs">Select an Eagle above to view her scouting report</div>`; return; }
 
-            let s = { gp:0, pts:0, reb:0, ast:0, to:0, ftm:0, fta:0, h_p:0, l_p:Infinity, awards:[], trend:[], pos:"" };
+            let s = { 
+                gp:0, pts:0, reb:0, ast:0, to:0, stl:0, ftm:0, fta:0, 
+                fg2m:0, fg2a:0, fg3m:0, fg3a:0,
+                highs: { fgm:0, fga:0, fg3m:0, fg3a:0, ftm:0, fta:0, reb:0, ast:0, stl:0, to:0, pts:0 },
+                awards:[], trend:[], pos:"" 
+            };
+
             h.forEach(g => {
                 const p = g.stats.find(pl => pl.name === name);
                 if(p) {
-                    s.gp++; s.pts += p.pts; s.reb += p.reb; s.ast += p.ast; s.to += p.to; s.ftm += p.ftm; s.fta += p.fta; s.pos = p.pos;
-                    if(p.pts > s.h_p) s.h_p = p.pts; if(p.pts < s.l_p) s.l_p = p.pts;
+                    s.gp++; s.pts += p.pts; s.reb += p.reb; s.ast += p.ast; s.to += p.to; s.stl += p.stl;
+                    s.ftm += p.ftm; s.fta += p.fta; s.fg2m += p.fg2m; s.fg2a += p.fg2a; s.fg3m += p.fg3m; s.fg3a += p.fg3a;
+                    s.pos = p.pos;
+
+                    // Season Highs Calculation
+                    const curFgm = p.fg2m + p.fg3m; const curFga = p.fg2a + p.fg3a;
+                    if(curFgm > s.highs.fgm) s.highs.fgm = curFgm;
+                    if(curFga > s.highs.fga) s.highs.fga = curFga;
+                    if(p.fg3m > s.highs.fg3m) s.highs.fg3m = p.fg3m;
+                    if(p.fg3a > s.highs.fg3a) s.highs.fg3a = p.fg3a;
+                    if(p.ftm > s.highs.ftm) s.highs.ftm = p.ftm;
+                    if(p.fta > s.highs.fta) s.highs.fta = p.fta;
+                    if(p.reb > s.highs.reb) s.highs.reb = p.reb;
+                    if(p.ast > s.highs.ast) s.highs.ast = p.ast;
+                    if(p.stl > s.highs.stl) s.highs.stl = p.stl;
+                    if(p.to > s.highs.to) s.highs.to = p.to;
+                    if(p.pts > s.highs.pts) s.highs.pts = p.pts;
+
                     if(g.hardHatWinners?.includes(name)) s.awards.push({t:'Hard Hat', i:'👷', d:g.date, o:g.opp});
                     if(g.windexWinners?.includes(name)) s.awards.push({t:'Windex Bottle', i:'🧽', d:g.date, o:g.opp});
                     if(g.hustleWinner === name) s.awards.push({t:'Hustle Award', i:'⚡', d:g.date, o:g.opp});
@@ -371,34 +391,53 @@
                 }
             });
 
+            if(s.gp === 0) { area.innerHTML = `<div class="text-center py-20 text-gray-600">No game data logged for ${name} this season.</div>`; return; }
+
             const pct = (m, a) => a > 0 ? ((m/a)*100).toFixed(1) + '%' : '0.0%';
+            
             area.innerHTML = `
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
                     <div class="lg:col-span-1 bg-black border border-gold p-6 rounded-3xl text-center shadow-2xl">
-                        <div class="text-gold text-[10px] font-black uppercase mb-1">${s.pos} | Eagles Basketball</div>
+                        <div class="text-gold text-[10px] font-black uppercase mb-1">${s.pos} | Eagles Varsity</div>
                         <h2 class="text-2xl font-black uppercase text-white mb-4">${name}</h2>
                         <div class="grid grid-cols-2 gap-2"><div class="bg-gray-950 p-2 rounded border border-gray-800"><div class="text-[8px] text-gray-500 uppercase font-bold">PPG</div><div class="text-lg font-black">${(s.pts/s.gp||0).toFixed(1)}</div></div><div class="bg-gray-950 p-2 rounded border border-gray-800"><div class="text-[8px] text-gray-500 uppercase font-bold">RPG</div><div class="text-lg font-black">${(s.reb/s.gp||0).toFixed(1)}</div></div></div>
                     </div>
                     <div class="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
-                        ${[{l:'Season Hard Hats',v:s.awards.filter(x=>x.t==='Hard Hat').length},{l:'Season Windex',v:s.awards.filter(x=>x.t==='Windex Bottle').length},{l:'Season Energy',v:s.awards.filter(x=>x.t==='Hustle Award').length},{l:'Season Grit',v:s.awards.filter(x=>x.t==='Grit Award').length}].map(x => `<div class="profile-stat-box"><div class="text-[8px] text-gray-500 uppercase font-bold mb-1">${x.l}</div><div class="text-3xl font-black text-white">${x.v}</div></div>`).join('')}
+                        ${[{l:'Season HH',v:s.awards.filter(x=>x.t==='Hard Hat').length},{l:'Season Windex',v:s.awards.filter(x=>x.t==='Windex Bottle').length},{l:'Season Energy',v:s.awards.filter(x=>x.t==='Hustle Award').length},{l:'Season Grit',v:s.awards.filter(x=>x.t==='Grit Award').length}].map(x => `<div class="profile-stat-box"><div class="text-[8px] text-gray-500 uppercase font-bold mb-1">${x.l}</div><div class="text-3xl font-black text-white">${x.v}</div></div>`).join('')}
                     </div>
                 </div>
+                
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Scouting / Efficiency -->
                     <div class="bg-black border border-gray-800 p-6 rounded-3xl">
-                        <h3 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Scouting Notes</h3>
+                        <h3 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Efficiency Metrics</h3>
                         <div class="space-y-2">
-                            <div class="flex justify-between p-2 rounded border border-gray-900 bg-gray-950"><span>Shooting (FT%)</span><span class="font-black text-gold">${pct(s.ftm, s.fta)}</span></div>
-                            <div class="flex justify-between p-2 rounded border border-gray-900 bg-gray-950"><span>AST:TO Ratio</span><span class="font-black">${(s.ast/s.to || 0).toFixed(1)}</span></div>
-                            <div class="flex justify-between p-2 rounded border border-gray-900 bg-gray-950"><span>Point High/Low</span><span class="font-black">${s.h_p} / ${s.l_p}</span></div>
+                            <div class="flex justify-between p-2 rounded border border-gray-900 bg-gray-950"><span>2PT %</span><span class="font-black text-white">${pct(s.fg2m, s.fg2a)}</span></div>
+                            <div class="flex justify-between p-2 rounded border border-gray-900 bg-gray-950"><span>3PT %</span><span class="font-black text-gold">${pct(s.fg3m, s.fg3a)}</span></div>
+                            <div class="flex justify-between p-2 rounded border border-gray-900 bg-gray-950"><span>FT %</span><span class="font-black text-white">${pct(s.ftm, s.fta)}</span></div>
+                            <div class="flex justify-between p-2 rounded border border-gray-900 bg-gray-950"><span>AST:TO Ratio</span><span class="font-black text-white">${(s.ast/s.to || 0).toFixed(1)}</span></div>
                         </div>
                     </div>
+
+                    <!-- Season Highs -->
                     <div class="lg:col-span-2 bg-black border border-gray-800 p-6 rounded-3xl">
-                        <h3 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Award History</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 h-40 overflow-y-auto">
-                            ${s.awards.map(a => `<div class="text-[10px] p-2 bg-gray-900 rounded border border-gray-800 flex justify-between"><span>${a.i} ${a.t}</span><span class="text-gray-500 uppercase">${a.d} vs ${a.o}</span></div>`).join('') || '<div class="text-gray-700 italic text-xs">No awards earned this season.</div>'}
+                        <h3 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Season Highs (Single Game)</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                            ${[
+                                {l:'Pts', v:s.highs.pts}, {l:'Reb', v:s.highs.reb},
+                                {l:'Ast', v:s.highs.ast}, {l:'Stl', v:s.highs.stl},
+                                {l:'TO', v:s.highs.to}, {l:'FGM', v:s.highs.fgm},
+                                {l:'FGA', v:s.highs.fga}, {l:'3PM', v:s.highs.fg3m},
+                                {l:'FTM', v:s.highs.ftm}, {l:'FTA', v:s.highs.fta}
+                            ].map(x => `<div class="bg-gray-950 border border-gray-900 p-3 rounded text-center"><div class="text-[7px] uppercase font-bold text-gray-500 mb-1">${x.l}</div><div class="text-xl font-black text-white">${x.v}</div></div>`).join('')}
                         </div>
                     </div>
-                </div>`;
+                </div>
+
+                <div class="bg-black border border-gray-800 p-6 rounded-3xl"><h3 class="text-xs font-black text-gray-500 uppercase mb-4 tracking-widest">Scoring Trend</h3><div class="h-40"><canvas id="profileTrendChart"></canvas></div></div>`;
+            
+            if(profileChart) profileChart.destroy();
+            profileChart = new Chart(document.getElementById('profileTrendChart'), { type: 'bar', data: { labels: s.trend.map(t => t.o), datasets: [{ label: 'Points', data: s.trend.map(t => t.v), backgroundColor: '#FFB81C', borderRadius: 4 }] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#222' } }, x: { grid: { display: false } } } } });
         }
 
         window.openEditStats = function(idx) {
@@ -406,15 +445,19 @@
             const g = h[idx]; currentGameEditIndex = idx;
             document.getElementById('editModal').classList.remove('hidden');
             let html = `<div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-950 border-b border-gray-800">
-                    <div><label class="text-[10px] text-gold font-bold uppercase">Opponent Score</label><input type="number" id="editOppScore" value="${g.oppScore}" class="w-full bg-black border border-gray-700 p-2 rounded text-white outline-none"></div>
-                    <div><label class="text-[10px] text-gold font-bold uppercase">Hustle Winner</label><select id="editHustle" class="w-full bg-gray-900 border border-gray-800 p-2 rounded text-white text-xs"><option value="">None</option>${ROSTER.map(p=>`<option value="${p.name}" ${g.hustleWinner===p.name?'selected':''}>${p.name}</option>`).join('')}</select></div>
-                    <div><label class="text-[10px] text-gold font-bold uppercase">Grit Winner</label><select id="editGrit" class="w-full bg-gray-900 border border-gray-800 p-2 rounded text-white text-xs"><option value="">None</option>${ROSTER.map(p=>`<option value="${p.name}" ${g.gritWinner===p.name?'selected':''}>${p.name}</option>`).join('')}</select></div>
+                    <div><label class="text-[10px] text-gold font-bold uppercase">Date</label><input type="date" id="editDate" value="${g.date}" class="w-full bg-black border border-gray-700 p-2 rounded text-white text-xs outline-none"></div>
+                    <div><label class="text-[10px] text-gold font-bold uppercase">Opponent</label><input type="text" id="editOpp" value="${g.opp}" class="w-full bg-black border border-gray-700 p-2 rounded text-white text-xs outline-none"></div>
+                    <div><label class="text-[10px] text-red-500 font-bold uppercase">Opp Score</label><input type="number" id="editOppScore" value="${g.oppScore}" class="w-full bg-black border border-gray-700 p-2 rounded text-white text-xs outline-none"></div>
                 </div>
                 <div class="p-4 overflow-x-auto"><table class="w-full text-left text-xs"><thead><tr class="text-gold text-[9px] uppercase border-b border-gray-800"><th class="p-2 sticky-col">Player</th>${STAT_FIELDS.map(f=>`<th class="p-1 text-center">${f.toUpperCase()}</th>`).join('')}</tr></thead>
-                        <tbody>${g.stats.map(s => `<tr><td class="p-2 font-bold text-gray-300 sticky-col">${s.name}</td>${STAT_FIELDS.map(f=>`<td class="p-1 text-center"><input type="number" data-edit-player="${s.name}" data-edit-stat="${f}" value="${s[f]||0}" class="stat-input"></td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+                        <tbody>${g.stats.map(s => `<tr><td class="p-2 font-bold text-gray-300 sticky-col">${s.name}</td>${STAT_FIELDS.map(f=>`<td class="p-1 text-center"><input type="number" data-edit-player="${s.name}" data-edit-stat="${f}" value="${s[f]||0}" class="stat-input"></td>`).join('')}</tr>`).join('')}</tbody></table></div>
+                <div class="p-6 bg-gray-950 border-t border-gray-800 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label class="text-[10px] text-gold uppercase font-bold">Hustle Winner</label><select id="editHustle" class="w-full bg-gray-900 border border-gray-800 p-2 rounded text-white text-xs"><option value="">None</option>${ROSTER.map(p=>`<option value="${p.name}" ${g.hustleWinner===p.name?'selected':''}>${p.name}</option>`).join('')}</select></div>
+                    <div><label class="text-[10px] text-gold uppercase font-bold">Grit Winner</label><select id="editGrit" class="w-full bg-gray-900 border border-gray-800 p-2 rounded text-white text-xs"><option value="">None</option>${ROSTER.map(p=>`<option value="${p.name}" ${g.gritWinner===p.name?'selected':''}>${p.name}</option>`).join('')}</select></div>
+                </div>`;
             document.getElementById('editModalBody').innerHTML = html;
             document.getElementById('saveEditBtn').onclick = () => {
-                g.oppScore = parseInt(document.getElementById('editOppScore').value)||0;
+                g.date = document.getElementById('editDate').value; g.opp = document.getElementById('editOpp').value; g.oppScore = parseInt(document.getElementById('editOppScore').value)||0;
                 g.hustleWinner = document.getElementById('editHustle').value; g.gritWinner = document.getElementById('editGrit').value;
                 let tP = 0; g.stats.forEach(s => { STAT_FIELDS.forEach(f => { const i = document.querySelector(`[data-edit-player="${s.name}"][data-edit-stat="${f}"]`); if(i) s[f] = parseInt(i.value)||0; }); s.pts = (s.fg2m*2)+(s.fg3m*3)+s.ftm; tP += s.pts; });
                 g.teamScore = tP; g.result = tP > g.oppScore ? 'W' : (tP < g.oppScore ? 'L' : 'T');
@@ -450,7 +493,7 @@
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             let c = "Date,Opponent,OppScore,Player,2PM,2PA,3PM,3PA,FTM,FTA,REB,AST,STL,TO,PTS\n";
             h.forEach(g => g.stats.forEach(s => c += `${g.date},${g.opp},${g.oppScore},${s.name},${s.fg2m},${s.fg2a},${s.fg3m},${s.fg3a},${s.ftm},${s.fta},${s.reb},${s.ast},${s.stl},${s.to},${s.pts}\n`));
-            const b = new Blob([c], {type:'text/csv'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'Eagles_Stats_Full.csv'; a.click();
+            const b = new Blob([c], {type:'text/csv'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'Eagles_Stats_Export.csv'; a.click();
         }
     </script>
 </body>
