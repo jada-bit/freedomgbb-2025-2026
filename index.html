@@ -43,11 +43,13 @@
         .z-3-t { top: 2%; left: 25%; width: 50%; height: 31%; }
 
         .filter-select { background: #111; border: 1px solid #333; font-size: 10px; color: #9ca3af; padding: 6px 12px; border-radius: 8px; outline: none; }
+        .filter-select:focus { border-color: var(--eagle-gold); color: white; }
     </style>
 </head>
 <body class="bg-gray-950 text-white font-sans min-h-screen">
 
     <div class="max-w-7xl mx-auto pb-20">
+        <!-- Dashboard Header -->
         <header class="sticky top-0 z-50 bg-black border-b-4 border-gold p-4 md:p-6 shadow-2xl">
             <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
                 <div class="flex items-center gap-4">
@@ -82,7 +84,7 @@
                     </div>
                     <div class="space-y-1">
                         <label class="text-[10px] text-gold font-bold uppercase tracking-widest">Opponent Name</label>
-                        <input type="text" id="opponent" placeholder="Opponent" class="w-full bg-black border border-gray-700 p-3 rounded-lg text-white outline-none focus:border-gold text-sm">
+                        <input type="text" id="opponent" placeholder="Opponent Name" class="w-full bg-black border border-gray-700 p-3 rounded-lg text-white outline-none focus:border-gold text-sm">
                     </div>
                     <div class="space-y-1">
                         <label class="text-[10px] text-red-500 font-bold uppercase tracking-widest">Opponent Score</label>
@@ -123,7 +125,7 @@
                 </div>
 
                 <!-- Live Summary Card -->
-                <div class="bg-gold text-black rounded-3xl p-8 shadow-2xl text-center flex flex-col justify-center">
+                <div class="bg-gold text-black rounded-3xl p-8 shadow-2xl text-center flex flex-col justify-center border-b-[10px] border-black/20">
                     <h3 class="text-xl font-black uppercase italic mb-6">Live Game Snapshot</h3>
                     <div class="grid grid-cols-2 gap-8">
                         <div>
@@ -168,15 +170,37 @@
             </div>
 
             <div class="mt-12 text-center">
-                <button onclick="saveGame()" class="bg-gold text-black px-24 py-6 rounded-2xl font-black text-2xl uppercase shadow-2xl hover:scale-[1.03] transition-transform">Save Game Data</button>
+                <button onclick="saveGame()" class="bg-gold text-black px-24 py-6 rounded-2xl font-black text-2xl uppercase shadow-2xl hover:scale-[1.03] transition-transform ring-4 ring-gold/20">Submit Final Record</button>
             </div>
         </main>
 
         <!-- TACTICS VIEW -->
         <main id="view-tactics" class="hidden p-4 md:p-8 space-y-8 animate-fadeIn">
+            <div class="flex flex-col md:flex-row justify-between items-end gap-4">
+                <div>
+                    <h2 class="text-3xl font-black text-gold uppercase italic tracking-tighter">Offensive Tactics</h2>
+                    <p class="text-xs text-gray-500 font-bold uppercase">Set Play Efficiency & Scoring Heatmap</p>
+                </div>
+                <div class="flex flex-wrap gap-4">
+                    <div class="flex flex-col">
+                        <label class="text-[9px] text-gray-600 font-black mb-1 uppercase">Game Filter</label>
+                        <select id="tacticGameFilter" onchange="renderTactics()" class="filter-select bg-gray-900 border-gray-800 text-white min-w-[150px]"></select>
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-[9px] text-gray-600 font-black mb-1 uppercase">Shot Category</label>
+                        <select id="tacticZoneFilter" onchange="renderTactics()" class="filter-select bg-gray-900 border-gray-800 text-white">
+                            <option value="all">ALL SHOTS</option>
+                            <option value="inside">INSIDE (PAINT)</option>
+                            <option value="mid">MID-RANGE</option>
+                            <option value="outside">OUTSIDE (3PT)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div class="lg:col-span-2 bg-black border border-gray-800 rounded-2xl p-8 shadow-xl">
-                    <h2 class="text-2xl font-black text-gold uppercase italic mb-8 underline decoration-4 underline-offset-8">Offensive Set Efficiency</h2>
+                    <h2 class="text-xl font-black text-gold uppercase italic mb-8 underline decoration-4 underline-offset-8 tracking-widest">Set Play Efficiency</h2>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs">
                             <thead class="bg-gray-950 text-gray-500 uppercase font-black tracking-widest">
@@ -187,7 +211,7 @@
                     </div>
                 </div>
                 <div class="bg-black border border-gray-800 rounded-2xl p-8 shadow-xl text-center">
-                    <h2 class="text-2xl font-black text-gold uppercase italic mb-8">Season Scoring Heatmap</h2>
+                    <h2 class="text-xl font-black text-gold uppercase italic mb-8">Eagles Heatmap</h2>
                     <div class="court-container mb-6" id="seasonEaglesHeatMap"></div>
                 </div>
             </div>
@@ -195,14 +219,36 @@
 
         <!-- DEFENSE VIEW -->
         <main id="view-defense" class="hidden p-4 md:p-8 space-y-8 animate-fadeIn">
+            <div class="flex flex-col md:flex-row justify-between items-end gap-4">
+                <div>
+                    <h2 class="text-3xl font-black text-red-500 uppercase italic tracking-tighter">Defensive Scouting</h2>
+                    <p class="text-xs text-gray-500 font-bold uppercase">Opponent Heatmap & Defensive Grading</p>
+                </div>
+                <div class="flex flex-wrap gap-4">
+                    <div class="flex flex-col">
+                        <label class="text-[9px] text-gray-600 font-black mb-1 uppercase">Game Filter</label>
+                        <select id="defenseGameFilter" onchange="renderDefense()" class="filter-select bg-gray-900 border-gray-800 text-white min-w-[150px]"></select>
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-[9px] text-gray-600 font-black mb-1 uppercase">Shot Category</label>
+                        <select id="defenseZoneFilter" onchange="renderDefense()" class="filter-select bg-gray-900 border-gray-800 text-white">
+                            <option value="all">ALL SHOTS</option>
+                            <option value="inside">INSIDE (PAINT)</option>
+                            <option value="mid">MID-RANGE</option>
+                            <option value="outside">OUTSIDE (3PT)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div id="defensiveOverviewGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div class="bg-black border border-gray-800 rounded-2xl p-8 shadow-xl text-center">
-                    <h2 class="text-2xl font-black text-red-500 uppercase italic mb-8">Opponent Heatmap</h2>
+                    <h2 class="text-xl font-black text-red-500 uppercase italic mb-8">Opponent Heatmap</h2>
                     <div class="court-container border-red-900/40 mb-6" id="seasonOppHeatMap"></div>
                 </div>
                 <div class="lg:col-span-2 bg-black border border-gray-800 rounded-2xl p-8 shadow-xl">
-                    <h2 class="text-2xl font-black text-gold uppercase italic mb-8 underline decoration-4 underline-offset-8">Defensive Performance by Zone</h2>
+                    <h2 class="text-2xl font-black text-gold uppercase italic mb-8 underline decoration-4 underline-offset-8 tracking-widest">Defensive Grading by Zone</h2>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs">
                             <thead class="bg-gray-950 text-gray-500 uppercase font-black tracking-widest">
@@ -230,7 +276,7 @@
                     <h3 class="text-lg font-black uppercase italic mb-4 text-white">Top 3 Rebounders</h3>
                     <div id="reboundLeaders" class="space-y-4"></div>
                 </div>
-                <!-- Tactical Snapshot -->
+                <!-- Efficiency Leaders -->
                 <div class="clipboard-card p-6 rounded-2xl shadow-xl">
                     <h3 class="text-lg font-black uppercase italic mb-4 text-gold">Efficiency Leaders</h3>
                     <div id="efficiencyLeaders" class="space-y-4"></div>
@@ -240,12 +286,12 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Tactical Analysis -->
                 <div class="clipboard-card p-6 rounded-2xl shadow-xl">
-                    <h3 class="text-lg font-black uppercase italic mb-4 text-white">Tactical Snapshot</h3>
+                    <h3 class="text-lg font-black uppercase italic mb-4 text-white tracking-widest">Tactical Snapshot</h3>
                     <div id="tacticalSummary" class="space-y-4"></div>
                 </div>
                 <!-- Season Highs -->
                 <div class="clipboard-card p-6 rounded-2xl shadow-xl">
-                    <h3 class="text-lg font-black uppercase italic mb-4 text-gold">Season High Records</h3>
+                    <h3 class="text-lg font-black uppercase italic mb-4 text-gold tracking-widest">Season High Records</h3>
                     <div id="honorRoll" class="space-y-4"></div>
                 </div>
             </div>
@@ -254,7 +300,7 @@
         <!-- SEASON SUMMARY -->
         <main id="view-summary" class="hidden p-4 md:p-8 space-y-8 animate-fadeIn">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <div id="summary-header-grid" class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+                <div id="summary-header-grid" class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 w-full"></div>
                 <select id="posFilter" onchange="renderSeasonSummary()" class="filter-select"><option value="all">ALL POSITIONS</option><option value="PG">PG</option><option value="G">G</option><option value="F">F</option><option value="C">C</option></select>
             </div>
             <div id="summaryTableArea" class="overflow-x-auto bg-black border border-gray-800 rounded-2xl shadow-xl"></div>
@@ -263,7 +309,7 @@
         <!-- GAME LOG -->
         <main id="view-log" class="hidden p-4 md:p-8 space-y-6 animate-fadeIn">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <h2 class="text-2xl font-black text-gold uppercase italic">Season History</h2>
+                <h2 class="text-2xl font-black text-gold uppercase italic tracking-tighter">Season Game Records</h2>
                 <input type="text" id="logSearch" onkeyup="renderGameLog()" placeholder="Search Opponent..." class="bg-gray-900 border border-gray-800 p-2 rounded text-xs text-white outline-none focus:border-gold md:w-64">
             </div>
             <div id="gameLogArea" class="space-y-4"></div>
@@ -280,11 +326,11 @@
         <!-- SETTINGS -->
         <main id="view-settings" class="hidden p-4 md:p-8 space-y-8 animate-fadeIn">
             <div class="bg-black border border-gray-800 p-12 rounded-3xl max-w-2xl mx-auto shadow-2xl text-center">
-                <h2 class="text-2xl font-black text-gold uppercase italic mb-8">System Admin</h2>
+                <h2 class="text-2xl font-black text-gold uppercase italic mb-8 tracking-widest">Admin Control</h2>
                 <div class="flex flex-wrap gap-4 justify-center">
-                    <button onclick="exportToCSV()" class="bg-gray-800 text-white px-8 py-4 rounded-xl font-black uppercase text-xs">Full Backup (CSV)</button>
-                    <label class="bg-blue-900 text-white px-8 py-4 rounded-xl font-black uppercase text-xs cursor-pointer">Import Backup<input type="file" class="hidden" onchange="handleImport(this)"></label>
-                    <button onclick="clearData()" class="bg-red-900 text-white px-8 py-4 rounded-xl font-black uppercase text-xs">Purge Database</button>
+                    <button onclick="exportToCSV()" class="bg-gray-800 text-white px-8 py-4 rounded-xl font-black uppercase text-xs hover:bg-gray-700">Backup Dataset (CSV)</button>
+                    <label class="bg-blue-900 text-white px-8 py-4 rounded-xl font-black uppercase text-xs cursor-pointer hover:bg-blue-800">Restore Backup<input type="file" class="hidden" onchange="handleImport(this)"></label>
+                    <button onclick="clearData()" class="bg-red-900 text-white px-8 py-4 rounded-xl font-black uppercase text-xs hover:bg-red-700">Purge Dashboard</button>
                 </div>
             </div>
         </main>
@@ -293,13 +339,13 @@
         <div id="editModal" class="hidden fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-4">
             <div class="bg-black border border-gray-800 w-full max-w-6xl rounded-3xl shadow-2xl flex flex-col max-h-[95vh]">
                 <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-gray-900 rounded-t-3xl">
-                    <h2 class="text-xl font-black text-gold uppercase italic" id="editModalTitle">Modify Performance Record</h2>
+                    <h2 class="text-xl font-black text-gold uppercase italic" id="editModalTitle">Modify Record</h2>
                     <button onclick="closeEditModal()" class="text-gray-500 hover:text-white text-2xl font-bold">&times;</button>
                 </div>
                 <div id="editModalBody" class="overflow-y-auto flex-1"></div>
                 <div class="p-6 bg-gray-900 border-t border-gray-800 flex justify-end gap-4 rounded-b-3xl">
-                    <button onclick="closeEditModal()" class="px-6 py-3 font-bold uppercase text-xs text-gray-400">Cancel</button>
-                    <button id="saveEditBtn" class="bg-gold text-black px-8 py-3 rounded-xl font-black uppercase text-sm">Save Changes</button>
+                    <button onclick="closeEditModal()" class="px-6 py-3 font-bold uppercase text-xs text-gray-400 hover:text-white">Cancel</button>
+                    <button id="saveEditBtn" class="bg-gold text-black px-8 py-3 rounded-xl font-black uppercase text-sm shadow-xl transition-all">Update Database</button>
                 </div>
             </div>
         </div>
@@ -317,10 +363,9 @@
 
         const STAT_FIELDS = ['fg2m','fg2a','fg3m','fg3a','ftm','fta','reb','ast','stl','blk','to','fouls'];
         const SHOT_ZONES = ['paint', 'ml', 'mr', '3l', '3r', '3t'];
-        const STORAGE_KEY = 'eagles_basketball_v28_makesmisses';
+        const STORAGE_KEY = 'eagles_hoops_v30_final';
 
         let profileChart = null;
-        let currentGameEditIndex = null;
 
         window.onload = () => {
             const entryTable = document.getElementById('rosterRows');
@@ -332,7 +377,20 @@
             for(let i=0; i<3; i++) addSetPlayInput();
             document.getElementById('gameDate').valueAsDate = new Date();
             document.querySelectorAll('.live-calc').forEach(input => input.addEventListener('input', updateLiveTotals));
+            updateFilterLists();
         };
+
+        function updateFilterLists() {
+            const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const tSel = document.getElementById('tacticGameFilter');
+            const dSel = document.getElementById('defenseGameFilter');
+            
+            let opts = '<option value="all">ALL SEASON</option>';
+            h.forEach((g, idx) => { opts += `<option value="${idx}">${g.opp} (${g.date})</option>`; });
+            
+            if(tSel) tSel.innerHTML = opts;
+            if(dSel) dSel.innerHTML = opts;
+        }
 
         function updateLiveTotals() {
             let eM = 0, eX = 0, oM = 0, oX = 0;
@@ -367,6 +425,7 @@
             if(v === 'tactics') renderTactics();
             if(v === 'defense') renderDefense();
             if(v === 'log') renderGameLog();
+            if(v === 'tactics' || v === 'defense') updateFilterLists();
         }
 
         function saveGame() {
@@ -381,43 +440,74 @@
                 s.pts = (s.fg2m * 2) + (s.fg3m * 3) + s.ftm; tPts += s.pts; game.stats.push(s);
             });
             game.teamScore = tPts; game.result = tPts > oppScore ? 'W' : (tPts < oppScore ? 'L' : 'T');
+            
             document.querySelectorAll('#setPlayInputs > div:not(.text-gray-500)').forEach(row => {
                 const ni = row.querySelector('.set-name');
                 if(ni && ni.value) game.setPlays.push({ name: ni.value, run: parseInt(row.querySelector('.set-run').value)||0, scored: parseInt(row.querySelector('.set-scored').value)||0, pts: parseInt(row.querySelector('.set-pts').value)||0 });
             });
+            
             SHOT_ZONES.forEach(z => {
                 game.shotMap.eagles[z] = { m: parseInt(document.querySelector(`input[data-team="eagles"][data-zone="${z}"][data-type="m"]`).value)||0, x: parseInt(document.querySelector(`input[data-team="eagles"][data-zone="${z}"][data-type="x"]`).value)||0 };
                 game.shotMap.opp[z] = { m: parseInt(document.querySelector(`input[data-team="opp"][data-zone="${z}"][data-type="m"]`).value)||0, x: parseInt(document.querySelector(`input[data-team="opp"][data-zone="${z}"][data-type="x"]`).value)||0 };
             });
+            
             h.push(game); localStorage.setItem(STORAGE_KEY, JSON.stringify(h));
-            alert("Season Stats Updated."); location.reload();
+            alert("Database Synced."); location.reload();
         }
 
         function renderTactics() {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const gameIdx = document.getElementById('tacticGameFilter').value;
+            const zoneCat = document.getElementById('tacticZoneFilter').value;
+            
+            let filterHistory = gameIdx === 'all' ? h : [h[gameIdx]];
             const plays = {}, heat = { paint:{m:0,x:0}, ml:{m:0,x:0}, mr:{m:0,x:0}, '3l':{m:0,x:0}, '3r':{m:0,x:0}, '3t':{m:0,x:0} };
-            h.forEach(g => {
+            
+            filterHistory.forEach(g => {
+                if(!g) return;
                 g.setPlays?.forEach(p => { if(!plays[p.name]) plays[p.name] = { r:0, s:0, p:0 }; plays[p.name].r += p.run; plays[p.name].s += p.scored; plays[p.name].p += p.pts; });
                 if(g.shotMap?.eagles) Object.entries(g.shotMap.eagles).forEach(([z, d]) => { if(heat[z]) { heat[z].m += (d.m||0); heat[z].x += (d.x||0); } });
             });
+
             const sPlays = Object.values(plays).sort((a,b) => (b.p/b.r) - (a.p/a.r));
-            document.getElementById('playEfficiencyBody').innerHTML = sPlays.map(p => `<tr class="border-b border-gray-900"><td class="p-4 font-bold text-gold">${p.name}</td><td class="text-center">${p.r}</td><td class="text-center text-gray-400">${((p.s/p.r)*100 || 0).toFixed(0)}%</td><td class="text-center">${p.p}</td><td class="text-center font-black text-white">${(p.p/p.r || 0).toFixed(2)}</td></tr>`).join('') || '<tr><td colspan="5" class="p-10 text-center text-gray-700 uppercase">No tactical data found.</td></tr>';
+            document.getElementById('playEfficiencyBody').innerHTML = sPlays.map(p => `<tr class="border-b border-gray-900"><td class="p-4 font-bold text-gold">${p.name}</td><td class="text-center">${p.r}</td><td class="text-center text-gray-400">${((p.s/p.r)*100 || 0).toFixed(0)}%</td><td class="text-center">${p.p}</td><td class="text-center font-black text-white">${(p.p/p.r || 0).toFixed(2)}</td></tr>`).join('') || '<tr><td colspan="5" class="p-10 text-center uppercase text-[10px] text-gray-700">No Data.</td></tr>';
+            
             const maxAtts = Math.max(...Object.values(heat).map(v => v.m + v.x)) || 1;
             const court = document.getElementById('seasonEaglesHeatMap'); court.innerHTML = '';
+            
             Object.entries(heat).forEach(([z, v]) => {
                 const atts = v.m + v.x; const opacity = (atts / maxAtts).toFixed(2); const pct = atts > 0 ? ((v.m / atts)*100).toFixed(0) : 0;
                 const classMap = { paint: 'z-paint', ml:'z-mid-l', mr:'z-mid-r', '3l':'z-3-l', '3r':'z-3-r', '3t':'z-3-t' };
-                court.innerHTML += `<div class="court-zone ${classMap[z]}" style="background: rgba(255, 184, 28, ${opacity})"><span class="text-[12px] font-black text-black">${pct}%</span><span class="text-[7px] font-black text-black/50">${v.m}/${atts}</span></div>`;
+                
+                let visible = true;
+                if(zoneCat === 'inside') visible = z === 'paint';
+                else if(zoneCat === 'mid') visible = z === 'ml' || z === 'mr';
+                else if(zoneCat === 'outside') visible = z.startsWith('3');
+                
+                if(visible) {
+                    court.innerHTML += `<div class="court-zone ${classMap[z]}" style="background: rgba(255, 184, 28, ${opacity})"><span class="text-[12px] font-black text-black">${pct}%</span><span class="text-[7px] font-black text-black/50">${v.m}/${atts}</span></div>`;
+                }
             });
         }
 
         function renderDefense() {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const gameIdx = document.getElementById('defenseGameFilter').value;
+            const zoneCat = document.getElementById('defenseZoneFilter').value;
+            
+            let filterHistory = gameIdx === 'all' ? h : [h[gameIdx]];
             const heat = { paint:{m:0,x:0}, ml:{m:0,x:0}, mr:{m:0,x:0}, '3l':{m:0,x:0}, '3r':{m:0,x:0}, '3t':{m:0,x:0} };
             let tOppS = 0, tStl = 0, tBlk = 0;
-            h.forEach(g => { tOppS += g.oppScore; g.stats.forEach(s => { tStl += s.stl; tBlk += (s.blk||0); }); if(g.shotMap?.opp) Object.entries(g.shotMap.opp).forEach(([z, d]) => { if(heat[z]) { heat[z].m += (d.m||0); heat[z].x += (d.x||0); } }); });
-            const gp = h.length || 1;
+            
+            filterHistory.forEach(g => {
+                if(!g) return;
+                tOppS += g.oppScore; g.stats.forEach(s => { tStl += s.stl; tBlk += (s.blk||0); }); 
+                if(g.shotMap?.opp) Object.entries(g.shotMap.opp).forEach(([z, d]) => { if(heat[z]) { heat[z].m += (d.m||0); heat[z].x += (d.x||0); } }); 
+            });
+            
+            const gp = filterHistory.length || 1;
             document.getElementById('defensiveOverviewGrid').innerHTML = `<div class="bg-black border border-red-900/50 p-4 rounded-2xl text-center shadow-xl"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Opp PPG</div><div class="text-2xl font-black text-red-500">${(tOppS/gp).toFixed(1)}</div></div><div class="bg-black border border-gray-800 p-4 rounded-2xl text-center shadow-xl"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">STOCKS PG</div><div class="text-2xl font-black text-gold">${((tStl + tBlk)/gp).toFixed(1)}</div></div><div class="bg-black border border-gray-800 p-4 rounded-2xl text-center shadow-xl"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Steals PG</div><div class="text-2xl font-black text-white">${(tStl/gp).toFixed(1)}</div></div><div class="bg-black border border-gray-800 p-4 rounded-2xl text-center shadow-xl"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">Blocks PG</div><div class="text-2xl font-black text-white">${(tBlk/gp).toFixed(1)}</div></div>`;
+            
             const maxAtts = Math.max(...Object.values(heat).map(v => v.m + v.x)) || 1;
             const court = document.getElementById('seasonOppHeatMap'); court.innerHTML = '';
             const tRows = [];
@@ -425,17 +515,25 @@
                 const atts = v.m + v.x; const opacity = (atts / maxAtts).toFixed(2); const pct = atts > 0 ? ((v.m / atts)*100).toFixed(1) : 0;
                 const labels = { paint: 'Paint', ml:'Mid Left', mr:'Mid Right', '3l':'3PT Left', '3r':'3PT Right', '3t':'3PT Top' };
                 const classMap = { paint: 'z-paint', ml:'z-mid-l', mr:'z-mid-r', '3l':'z-3-l', '3r':'z-3-r', '3t':'z-3-t' };
-                court.innerHTML += `<div class="court-zone ${classMap[z]}" style="background: rgba(239, 68, 68, ${opacity})"><span class="text-[12px] font-black text-white">${pct}%</span></div>`;
-                let grade = pct < 35 ? 'A+' : pct < 42 ? 'B' : pct < 50 ? 'C' : 'D';
-                tRows.push(`<tr class="border-b border-gray-900"><td class="p-4 font-bold text-gray-400">${labels[z]}</td><td class="text-center text-white font-bold">${v.m}/${atts}</td><td class="text-center font-black">${pct}%</td><td class="text-center"><span class="px-2 py-1 rounded bg-gray-900 border border-gray-800 font-black ${grade==='A+'?'text-green-500':grade==='B'?'text-gold':'text-red-500'}">${grade}</span></td></tr>`);
+                
+                let visible = true;
+                if(zoneCat === 'inside') visible = z === 'paint';
+                else if(zoneCat === 'mid') visible = z === 'ml' || z === 'mr';
+                else if(zoneCat === 'outside') visible = z.startsWith('3');
+
+                if(visible) {
+                    court.innerHTML += `<div class="court-zone ${classMap[z]}" style="background: rgba(239, 68, 68, ${opacity})"><span class="text-[12px] font-black text-white">${pct}%</span></div>`;
+                    let grade = pct < 35 ? 'A+' : pct < 42 ? 'B' : pct < 50 ? 'C' : 'D';
+                    tRows.push(`<tr class="border-b border-gray-900"><td class="p-4 font-bold text-gray-400">${labels[z]}</td><td class="text-center text-white font-bold">${v.m}/${atts}</td><td class="text-center font-black">${pct}%</td><td class="text-center"><span class="px-2 py-1 rounded bg-gray-900 border border-gray-800 font-black ${grade==='A+'?'text-green-500':grade==='B'?'text-gold':'text-red-500'}">${grade}</span></td></tr>`);
+                }
             });
-            document.getElementById('defensiveZoneBody').innerHTML = tRows.join('') || '<tr><td colspan="4" class="p-10 text-center">No defensive data logged.</td></tr>';
+            document.getElementById('defensiveZoneBody').innerHTML = tRows.join('') || '<tr><td colspan="4" class="p-10 text-center uppercase text-[10px]">No matches found.</td></tr>';
         }
 
         function renderCoachClipboard() {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const mGrid = document.getElementById('masterOverviewGrid');
-            if (h.length === 0) { mGrid.innerHTML = '<div class="col-span-7 py-10 text-center text-gray-600 font-black uppercase italic tracking-widest">No season data available.</div>'; return; }
+            if (h.length === 0) { mGrid.innerHTML = '<div class="col-span-7 py-10 text-center text-gray-700 font-black uppercase italic tracking-widest">No data available.</div>'; return; }
             
             let wins = h.filter(g => g.result === 'W').length, tPts = h.reduce((a,b)=>a+b.teamScore,0), tOpp = h.reduce((a,b)=>a+b.oppScore,0);
             let tReb = 0, tAst = 0, tStl = 0, tBlk = 0, tTo = 0, tFgm = 0;
@@ -458,43 +556,45 @@
             const metrics = [{l:'Record', v:`${wins}-${gp-wins}`}, {l:'Team PPG', v:(tPts/gp).toFixed(1)}, {l:'Opp PPG', v:(tOpp/gp).toFixed(1)}, {l:'Team RPG', v:(tReb/gp).toFixed(1)}, {l:'APG', v:(tAst/gp).toFixed(1)}, {l:'TOPG', v:(tTo/gp).toFixed(1), c:'text-red-500'}, {l:'STOCKS PG', v:((tStl+tBlk)/gp).toFixed(1)}];
             mGrid.innerHTML = metrics.map(m => `<div class="bg-black border border-gray-800 p-4 rounded-xl text-center shadow-xl border-t-2 border-t-gold"><div class="text-[8px] uppercase text-gray-500 font-black mb-1">${m.l}</div><div class="text-xl font-black italic ${m.c || 'text-white'}">${m.v}</div></div>`).join('');
 
-            // Leaderboards
+            // Top 3s
             const topScorersTotal = Object.entries(playerStats).sort((a,b) => b[1].pts - a[1].pts).slice(0,3);
             const topScorersPPG = Object.entries(playerStats).sort((a,b) => (b[1].pts/b[1].gp) - (a[1].pts/a[1].gp)).slice(0,3);
             document.getElementById('scoreLeaders').innerHTML = `
-                <div class="text-[10px] text-gray-500 uppercase font-black mb-2">Total Points</div>
+                <div class="text-[9px] text-gray-500 uppercase font-black mb-2">Season Point Volume</div>
                 ${topScorersTotal.map(p => `<div class="flex justify-between p-2 rounded bg-gray-950 border border-gray-900 mb-1"><span class="text-xs font-bold">${p[0]}</span><span class="font-black text-gold">${p[1].pts}</span></div>`).join('')}
-                <div class="text-[10px] text-gray-500 uppercase font-black mt-4 mb-2">Points Per Game</div>
+                <div class="text-[9px] text-gray-500 uppercase font-black mt-4 mb-2">Points Per Game</div>
                 ${topScorersPPG.map(p => `<div class="flex justify-between p-2 rounded bg-gray-950 border border-gray-800 mb-1"><span class="text-xs font-bold">${p[0]}</span><span class="font-black text-white">${(p[1].pts/p[1].gp).toFixed(1)}</span></div>`).join('')}`;
 
             const topRebTotal = Object.entries(playerStats).sort((a,b) => b[1].reb - a[1].reb).slice(0,3);
             const topRebRPG = Object.entries(playerStats).sort((a,b) => (b[1].reb/b[1].gp) - (a[1].reb/a[1].gp)).slice(0,3);
             document.getElementById('reboundLeaders').innerHTML = `
-                <div class="text-[10px] text-gray-500 uppercase font-black mb-2">Total Boards</div>
+                <div class="text-[9px] text-gray-500 uppercase font-black mb-2">Total Rebounds</div>
                 ${topRebTotal.map(p => `<div class="flex justify-between p-2 rounded bg-gray-950 border border-gray-900 mb-1"><span class="text-xs font-bold">${p[0]}</span><span class="font-black text-white">${p[1].reb}</span></div>`).join('')}
-                <div class="text-[10px] text-gray-500 uppercase font-black mt-4 mb-2">Rebounds Per Game</div>
+                <div class="text-[9px] text-gray-500 uppercase font-black mt-4 mb-2">Rebounds Per Game</div>
                 ${topRebRPG.map(p => `<div class="flex justify-between p-2 rounded bg-gray-950 border border-gray-800 mb-1"><span class="text-xs font-bold">${p[0]}</span><span class="font-black text-gold">${(p[1].reb/p[1].gp).toFixed(1)}</span></div>`).join('')}`;
 
             const top3PT = Object.entries(playerStats).filter(p => p[1].a3 >= p[1].gp).sort((a,b) => (b[1].m3/b[1].a3) - (a[1].m3/a[1].a3)).slice(0,3);
             const top2PT = Object.entries(playerStats).filter(p => p[1].a2 >= p[1].gp).sort((a,b) => (b[1].m2/b[1].a2) - (a[1].m2/a[1].a2)).slice(0,3);
             document.getElementById('efficiencyLeaders').innerHTML = `
-                <div class="text-[10px] text-gray-500 uppercase font-black mb-2">Top 3PT % (min 1att/gm)</div>
+                <div class="text-[9px] text-gray-500 uppercase font-black mb-2">Top 3PT % (min 1/gm)</div>
                 ${top3PT.map(p => `<div class="flex justify-between p-2 rounded bg-gray-950 border border-gray-900 mb-1"><span class="text-xs font-bold">${p[0]}</span><span class="font-black text-gold">${((p[1].m3/p[1].a3)*100 || 0).toFixed(1)}%</span></div>`).join('')}
-                <div class="text-[10px] text-gray-500 uppercase font-black mt-4 mb-2">Top 2PT % (min 1att/gm)</div>
+                <div class="text-[9px] text-gray-500 uppercase font-black mt-4 mb-2">Top 2PT % (min 1/gm)</div>
                 ${top2PT.map(p => `<div class="flex justify-between p-2 rounded bg-gray-950 border border-gray-800 mb-1"><span class="text-xs font-bold">${p[0]}</span><span class="font-black text-white">${((p[1].m2/p[1].a2)*100 || 0).toFixed(1)}%</span></div>`).join('')}`;
 
             const bP = Object.entries(plays).sort((a,b) => (b[1].s/b[1].r) - (a[1].s/a[1].r))[0];
             const bZ = Object.entries(heat).sort((a,b) => (b[1].m/(b[1].m+b[1].x)) - (a[1].m/(a[1].m+a[1].x)))[0];
-            document.getElementById('tacticalSummary').innerHTML = `<div class="p-3 bg-gray-950 border border-gray-900 rounded-xl mb-2"><div class="text-[8px] uppercase text-gray-500 font-bold mb-1">Top Play (Success Rate)</div><div class="text-sm font-black text-white">${bP ? bP[0] : 'N/A'} <span class="text-gold ml-2">${bP ? ((bP[1].s/bP[1].r)*100).toFixed(0)+'%' : ''}</span></div></div><div class="p-3 bg-gray-950 border border-gray-900 rounded-xl mb-2"><div class="text-[8px] uppercase text-gray-500 font-bold mb-1">Identity Shooting Zone</div><div class="text-sm font-black text-white">${bZ ? bZ[0].toUpperCase() : 'N/A'} <span class="text-gold ml-2">${bZ ? ((bZ[1].m/(bZ[1].m+bZ[1].x))*100).toFixed(0)+'%' : ''}</span></div></div><div class="p-3 bg-gray-950 border border-gray-900 rounded-xl"><div class="text-[8px] uppercase text-gray-500 font-bold mb-1">Assist Percentage</div><div class="text-sm font-black text-white">${((tAst/tFgm)*100 || 0).toFixed(1)}% <span class="text-gray-500 ml-2 font-normal italic">(Goal: 65%)</span></div></div>`;
+            document.getElementById('tacticalSummary').innerHTML = `<div class="p-3 bg-gray-950 border border-gray-900 rounded-xl mb-2"><div class="text-[8px] uppercase text-gray-500 font-bold mb-1">Top Play (Success Rate)</div><div class="text-sm font-black text-white">${bP ? bP[0] : 'N/A'} <span class="text-gold ml-2">${bP ? ((bP[1].s/bP[1].r)*100).toFixed(0)+'%' : ''}</span></div></div><div class="p-3 bg-gray-950 border border-gray-900 rounded-xl mb-2"><div class="text-[8px] uppercase text-gray-500 font-bold mb-1">Identity Shooting Zone</div><div class="text-sm font-black text-white">${bZ ? bZ[0].toUpperCase() : 'N/A'} <span class="text-gold ml-2">${bZ ? ((bZ[1].m/(bZ[1].m+bZ[1].x))*100).toFixed(0)+'%' : ''}</span></div></div><div class="p-3 bg-gray-950 border border-gray-900 rounded-xl"><div class="text-[8px] uppercase text-gray-500 font-bold mb-1">AST on FG%</div><div class="text-sm font-black text-white">${((tAst/tFgm)*100 || 0).toFixed(1)}% <span class="text-gray-500 ml-2 font-normal italic">(Goal: 65%)</span></div></div>`;
             const allP = []; h.forEach(g => g.stats.forEach(s => allP.push({ n: s.name, pts: s.pts, reb: s.reb, date: g.date, opp: g.opp })));
-            const findHighSeason = (k) => { let max = Math.max(...allP.map(o => o[k])); return allP.filter(o => o[k] === max && max > 0); };
-            document.getElementById('honorRoll').innerHTML = [{t:'Points', k:'pts'}, {t:'Rebounds', k:'reb'}].map(s => `<div class="p-3 bg-gray-900 border border-gray-800 rounded-xl mb-2"><div class="text-[9px] text-gray-500 uppercase font-black mb-2">${s.t} Record</div>${findHighSeason(s.k).map(w => `<div class="flex justify-between items-baseline border-l border-gold pl-2"><div><div class="text-xs font-black uppercase text-white">${w.n}</div><div class="text-[7px] text-gray-600 uppercase">${w.date}</div></div><div class="text-xl font-black text-gold">${w[s.k]}</div></div>`).join('')}</div>`).join('');
+            const findHS = (k) => { let max = Math.max(...allP.map(o => o[k])); return allP.filter(o => o[k] === max && max > 0); };
+            document.getElementById('honorRoll').innerHTML = [{t:'Points', k:'pts'}, {t:'Rebounds', k:'reb'}].map(s => `<div class="p-3 bg-gray-900 border border-gray-800 rounded-xl mb-2"><div class="text-[9px] text-gray-500 uppercase font-black mb-2">${s.t} Record</div>${findHS(s.k).map(w => `<div class="flex justify-between items-baseline border-l border-gold pl-2"><div><div class="text-xs font-black uppercase text-white">${w.n}</div><div class="text-[7px] text-gray-600 uppercase">${w.date}</div></div><div class="text-xl font-black text-gold">${w[s.k]}</div></div>`).join('')}</div>`).join('');
         }
 
         function renderSeasonSummary() {
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const pM = {}; ROSTER.forEach(r => pM[r.name] = { gp:0, pts:0, reb:0, ast:0, stl:0, blk:0, to:0, h:0, l:Infinity, pos:r.pos });
             h.forEach(g => g.stats.forEach(s => { const p = pM[s.name]; if (!p) return; p.gp++; p.pts += s.pts; p.reb += s.reb; p.ast += s.ast; p.stl += s.stl; p.blk += (s.blk||0); p.to += s.to; if(s.pts > p.h) p.h = s.pts; if(s.pts < p.l) p.l = s.pts; }));
+            const gp = h.length || 1;
+            document.getElementById('summary-header-grid').innerHTML = `<div class="bg-black border border-gray-800 p-4 rounded-xl text-center shadow-xl"><div class="text-[8px] text-gray-500 uppercase font-black mb-1">Season PPG</div><div class="text-2xl font-black italic text-gold">${(h.reduce((a,b)=>a+b.teamScore,0)/gp).toFixed(1)}</div></div><div class="bg-black border border-gray-800 p-4 rounded-xl text-center shadow-xl"><div class="text-[8px] text-gray-500 uppercase font-black mb-1">STOCKS PG</div><div class="text-2xl font-black italic text-white">${((h.reduce((a,b)=>b.stats.reduce((x,y)=>x+(y.stl+(y.blk||0)),0)+a,0))/gp).toFixed(1)}</div></div>`;
             let html = `<table class="w-full text-left text-[10px]"><thead class="bg-gray-950 text-gray-500 uppercase"><tr><th class="p-4">Player</th><th>POS</th><th>GP</th><th>PPG</th><th>RPG</th><th>APG</th><th>SPG</th><th>BPG</th><th>H/L</th></tr></thead><tbody>`;
             const posF = document.getElementById('posFilter').value;
             for(let n in pM) { const p = pM[n]; if(p.gp === 0) continue; if(posF !== 'all' && p.pos !== posF) continue; html += `<tr class="border-b border-gray-900"><td class="p-4 font-bold text-gold">${n}</td><td><span class="text-gray-600 font-black">${p.pos}</span></td><td>${p.gp}</td><td>${(p.pts/p.gp).toFixed(1)}</td><td>${(p.reb/p.gp).toFixed(1)}</td><td>${(p.ast/p.gp).toFixed(1)}</td><td>${(p.stl/p.gp).toFixed(1)}</td><td>${(p.blk/p.gp).toFixed(1)}</td><td><span class="text-green-500">${p.h}</span> / <span class="text-red-500">${p.l}</span></td></tr>`; }
@@ -505,7 +605,7 @@
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const search = document.getElementById('logSearch').value.toLowerCase();
             const area = document.getElementById('gameLogArea');
-            if(h.length === 0) return area.innerHTML = `<div class="text-center py-20 text-gray-600 uppercase text-xs tracking-widest font-black italic">No records found.</div>`;
+            if(h.length === 0) return area.innerHTML = `<div class="text-center py-20 text-gray-600 uppercase text-xs tracking-widest font-black italic">No records.</div>`;
             const filtered = h.filter(g => g.opp.toLowerCase().includes(search));
             area.innerHTML = filtered.map((g, idx) => `<div class="bg-black border border-gray-800 rounded-xl overflow-hidden shadow-lg mb-4"><div class="bg-gray-900 p-4 flex justify-between items-center border-b border-gray-800"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded bg-gray-950 border border-gray-800 flex items-center justify-center font-black text-xl ${g.result==='W'?'text-gold':'text-red-600'}">${g.result||'?'}</div><div><span class="text-[9px] text-gray-500 font-bold block uppercase">${g.date}</span><span class="text-xl font-black italic uppercase tracking-tighter">Eagles ${g.teamScore}, ${g.opp} ${g.oppScore||0}</span></div></div><button onclick="openEditStats(${h.indexOf(g)})" class="text-white uppercase text-[8px] font-black bg-gray-800 px-3 py-1 rounded hover:bg-gold hover:text-black">Edit Stats</button></div></div>`).join('');
         }
@@ -514,7 +614,7 @@
             const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const name = document.getElementById('profilePicker').value;
             const area = document.getElementById('playerProfileArea');
-            if(!name) { area.innerHTML = `<div class="text-center py-10 text-gray-600 uppercase font-black italic">Select an Eagle above to view season statistics</div>`; return; }
+            if(!name) { area.innerHTML = `<div class="text-center py-10 text-gray-600 uppercase font-black italic">Select an Eagle above to view stats.</div>`; return; }
             const s = { gp:0, pts:0, reb:0, ast:0, to:0, stl:0, blk:0, ftm:0, fta:0, fg2m:0, fg2a:0, fg3m:0, fg3a:0, highs: { fgm: {v:0,g:""}, fga: {v:0,g:""}, fg3m: {v:0,g:""}, fg3a: {v:0,g:""}, ftm: {v:0,g:""}, fta: {v:0,g:""}, reb: {v:0,g:""}, ast: {v:0,g:""}, stl: {v:0,g:""}, blk: {v:0,g:""}, to: {v:0,g:""}, pts: {v:0,g:""} }, trend:[], pos:"" };
             const sortedGames = [...h].sort((a,b) => new Date(a.date) - new Date(b.date));
             const checkH = (k, val, game) => { if(val >= s.highs[k].v) { s.highs[k].v = val; s.highs[k].g = `vs ${game.opp} (${game.date})`; } };
@@ -534,7 +634,7 @@
             const g = h[idx]; currentGameEditIndex = idx;
             const mB = document.getElementById('editModalBody');
             document.getElementById('editModal').classList.remove('hidden');
-            let html = `<div class="p-6 space-y-8"><div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-950 border border-gray-800 rounded-xl"><div><label class="text-[10px] text-gold font-bold uppercase">Opp Score</label><input type="number" id="editOppScore" value="${g.oppScore}" class="w-full bg-black border border-gray-700 p-2 rounded text-white text-xs"></div><div><label class="text-[10px] text-gray-500 uppercase italic">Opponent</label><div class="text-xs font-bold text-white mt-1">${g.opp}</div></div><div><label class="text-[10px] text-gray-500 uppercase italic">Date</label><div class="text-xs font-bold text-white mt-1">${g.date}</div></div></div><div class="overflow-x-auto border border-gray-900 rounded-xl"><table class="w-full text-left text-xs"><thead><tr class="bg-black text-gray-500 uppercase font-black text-[9px] tracking-widest"><th>Player</th>${STAT_FIELDS.map(f=>`<th class="text-center">${f}</th>`).join('')}</tr></thead><tbody>${g.stats.map(s => `<tr><td class="font-bold text-gray-300 border-b border-gray-900">${s.name}</td>${STAT_FIELDS.map(f=>`<td class="border-b border-gray-900 text-center"><input type="number" data-edit-p="${s.name}" data-edit-s="${f}" value="${s[f]||0}" class="stat-input"></td>`).join('')}</tr>`).join('')}</tbody></table></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div class="bg-gray-950 p-6 rounded-2xl border border-gray-800"><h4 class="text-[10px] uppercase font-black text-gold mb-4 underline decoration-gold/30">Edit Sets</h4><div id="editSetsContainer"></div><button onclick="addSetPlayInput('editSetsContainer')" class="mt-4 text-[9px] uppercase text-gold font-black bg-gray-900 border border-gray-800 px-4 py-2 rounded-lg hover:bg-gold hover:text-black transition-all">+ Add Play Row</button></div><div class="bg-gray-950 p-6 rounded-2xl border border-gray-800 text-center"><h4 class="text-[10px] uppercase font-black text-gold mb-4 underline decoration-gold/30">Edit Heat Map (M / X)</h4><div class="grid grid-cols-2 gap-2"><div class="space-y-1"><p class="text-[9px] font-black text-white mb-2 uppercase">Eagles (M/X)</p>${SHOT_ZONES.map(z=>`<div class="flex justify-between items-center"><span class="text-[8px] uppercase text-gray-500 font-black">${z}</span><div class="flex gap-1"><input type="number" id="ed-e-m-${z}" value="${g.shotMap?.eagles?.[z]?.m||0}" class="w-8 text-[11px] bg-black border border-gray-800 text-center text-gold"><input type="number" id="ed-e-x-${z}" value="${g.shotMap?.eagles?.[z]?.x||0}" class="w-8 text-[11px] bg-black border border-gray-800 text-center"></div></div>`).join('')}</div><div class="space-y-1"><p class="text-[9px] font-black text-red-500 mb-2 uppercase">Opponent (M/X)</p>${SHOT_ZONES.map(z=>`<div class="flex justify-between items-center"><span class="text-[8px] uppercase text-gray-500 font-black">${z}</span><div class="flex gap-1"><input type="number" id="ed-o-m-${z}" value="${g.shotMap?.opp?.[z]?.m||0}" class="w-8 text-[11px] bg-black border border-red-900/30 text-center text-red-500"><input type="number" id="ed-o-x-${z}" value="${g.shotMap?.opp?.[z]?.x||0}" class="w-8 text-[11px] bg-black border border-red-900/30 text-center"></div></div>`).join('')}</div></div></div></div></div>`;
+            let html = `<div class="p-6 space-y-8"><div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-950 border border-gray-800 rounded-xl shadow-inner"><div><label class="text-[10px] text-gold font-bold uppercase">Opp Score</label><input type="number" id="editOppScore" value="${g.oppScore}" class="w-full bg-black border border-gray-700 p-2 rounded text-white text-xs"></div><div><label class="text-[10px] text-gray-500 uppercase italic">Opponent</label><div class="text-xs font-bold text-white mt-1">${g.opp}</div></div><div><label class="text-[10px] text-gray-500 uppercase italic">Date</label><div class="text-xs font-bold text-white mt-1">${g.date}</div></div></div><div class="overflow-x-auto border border-gray-900 rounded-xl"><table class="w-full text-left text-xs"><thead><tr class="bg-black text-gray-500 uppercase font-black text-[9px] tracking-widest"><th>Player</th>${STAT_FIELDS.map(f=>`<th class="text-center">${f}</th>`).join('')}</tr></thead><tbody>${g.stats.map(s => `<tr><td class="font-bold text-gray-300 border-b border-gray-900">${s.name}</td>${STAT_FIELDS.map(f=>`<td class="border-b border-gray-900 text-center"><input type="number" data-edit-p="${s.name}" data-edit-s="${f}" value="${s[f]||0}" class="stat-input"></td>`).join('')}</tr>`).join('')}</tbody></table></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div class="bg-gray-950 p-6 rounded-2xl border border-gray-800 shadow-inner"><h4 class="text-[10px] uppercase font-black text-gold mb-4 underline decoration-gold/30">Edit Sets</h4><div id="editSetsContainer"></div><button onclick="addSetPlayInput('editSetsContainer')" class="mt-4 text-[9px] uppercase text-gold font-black bg-gray-900 border border-gray-800 px-4 py-2 rounded-lg hover:bg-gold hover:text-black transition-all">+ Add Play Row</button></div><div class="bg-gray-950 p-6 rounded-2xl border border-gray-800 shadow-inner text-center"><h4 class="text-[10px] uppercase font-black text-gold mb-4 underline decoration-gold/30">Edit Heat Map (M / X)</h4><div class="grid grid-cols-2 gap-2"><div class="space-y-1"><p class="text-[9px] font-black text-white mb-2 uppercase tracking-tighter italic">Eagles (M/X)</p>${SHOT_ZONES.map(z=>`<div class="flex justify-between items-center bg-black p-1 rounded border border-gray-900"><span class="text-[8px] uppercase text-gray-500 font-black">${z}</span><div class="flex gap-1"><input type="number" id="ed-e-m-${z}" value="${g.shotMap?.eagles?.[z]?.m||0}" class="w-8 text-[11px] bg-black border border-gray-800 text-center text-gold"><input type="number" id="ed-e-x-${z}" value="${g.shotMap?.eagles?.[z]?.x||0}" class="w-8 text-[11px] bg-black border border-gray-800 text-center"></div></div>`).join('')}</div><div class="space-y-1"><p class="text-[9px] font-black text-red-500 mb-2 uppercase tracking-tighter italic">Opponent (M/X)</p>${SHOT_ZONES.map(z=>`<div class="flex justify-between items-center bg-black p-1 rounded border border-gray-900"><span class="text-[8px] uppercase text-gray-500 font-black">${z}</span><div class="flex gap-1"><input type="number" id="ed-o-m-${z}" value="${g.shotMap?.opp?.[z]?.m||0}" class="w-8 text-[11px] bg-black border border-red-900/30 text-center text-red-500"><input type="number" id="ed-o-x-${z}" value="${g.shotMap?.opp?.[z]?.x||0}" class="w-8 text-[11px] bg-black border border-red-900/30 text-center"></div></div>`).join('')}</div></div></div></div></div>`;
             mB.innerHTML = html;
             (g.setPlays || []).forEach(p => addSetPlayInput('editSetsContainer', p));
             document.getElementById('saveEditBtn').onclick = () => {
@@ -547,7 +647,7 @@
             };
         };
         function closeEditModal() { document.getElementById('editModal').classList.add('hidden'); }
-        function clearData() { if(confirm("Erase all season data?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
+        function clearData() { if(confirm("Permanently wipe all season data?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
 
         function handleImport(input) {
             const file = input.files[0]; if(!file) return;
@@ -573,7 +673,7 @@
                     const h = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
                     Object.values(gM).forEach(g => { g.teamScore = g.stats.reduce((a,c)=>a+c.pts,0); g.result = g.teamScore > g.oppScore ? 'W' : (g.teamScore < g.oppScore ? 'L' : 'T'); h.push(g); });
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(h)); alert("Import complete!"); location.reload();
-                } catch (err) { alert("Error importing. Ensure file follows template."); }
+                } catch (err) { alert("Error importing CSV."); }
             }; reader.readAsText(file);
         }
         
@@ -582,13 +682,13 @@
             if (h.length === 0) { alert("No data to export."); return; }
             let c = "Date,Opponent,OppScore,Player,2PM,2PA,3PM,3PA,FTM,FTA,REB,AST,STL,BLK,TO,PTS,SetPlays_JSON,ShotMap_JSON\n";
             h.forEach(g => {
-                const tacticsStr = JSON.stringify(g.setPlays || []).replace(/"/g, '""');
+                const tacticalStr = JSON.stringify(g.setPlays || []).replace(/"/g, '""');
                 const mapsStr = JSON.stringify(g.shotMap || {}).replace(/"/g, '""');
                 g.stats.forEach(s => {
-                    c += `${g.date},${g.opp},${g.oppScore},${s.name},${s.fg2m},${s.fg2a},${s.fg3m},${s.fg3a},${s.ftm},${s.fta},${s.reb},${s.ast},${s.stl},${s.blk||0},${s.to},${s.pts},"${tacticsStr}","${mapsStr}"\n`;
+                    c += `${g.date},${g.opp},${g.oppScore},${s.name},${s.fg2m},${s.fg2a},${s.fg3m},${s.fg3a},${s.ftm},${s.fta},${s.reb},${s.ast},${s.stl},${s.blk||0},${s.to},${s.pts},"${tacticalStr}","${mapsStr}"\n`;
                 });
             });
-            const b = new Blob([c], {type:'text/csv'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'Eagles_Complete_Export.csv'; a.click();
+            const b = new Blob([c], {type:'text/csv'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'Eagles_Complete_Backup.csv'; a.click();
         }
     </script>
 </body>
