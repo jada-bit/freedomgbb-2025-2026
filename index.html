@@ -99,6 +99,10 @@
                 </div>
                 <div id="summaryTableArea" class="overflow-x-auto"></div>
             </div>
+            
+            <div class="text-center pt-10">
+                <button onclick="clearData()" class="text-red-900 text-[10px] uppercase hover:text-red-600 transition-colors">Clear All Local Data</button>
+            </div>
         </main>
 
         <!-- GAME LOG -->
@@ -204,6 +208,7 @@
                 let gameTotal = 0;
                 game.stats.forEach(s => {
                     const p = pMap[s.name];
+                    if (!p) return;
                     p.gp++; p.pts += s.pts; p.fg2m += s.fg2m; p.fg2a += s.fg2a; p.fg3m += s.fg3m; p.fg3a += s.fg3a; 
                     p.ftm += s.ftm; p.fta += s.fta; p.reb += s.reb; p.ast += s.ast; p.stl += s.stl; p.to += s.to;
                     team.pts += s.pts; team.reb += s.reb; team.ast += s.ast; team.stl += s.stl; team.to += s.to;
@@ -214,15 +219,12 @@
                 chartData.datasets[0].data.push(gameTotal);
             });
 
-            // Render Chart
             if(chartInstance) chartInstance.destroy();
             chartInstance = new Chart(document.getElementById('teamTrendChart'), { type: 'line', data: chartData, options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#222' } }, x: { grid: { display: false } } } } });
 
-            // Team Grid
             const metrics = [{l:'PPG', v:(team.pts/team.gp)}, {l:'RPG', v:(team.reb/team.gp)}, {l:'APG', v:(team.ast/team.gp)}, {l:'SPG', v:(team.stl/team.gp)}, {l:'TOPG', v:(team.to/team.gp), c:'text-red-500'}];
             document.getElementById('team-stats-grid').innerHTML = metrics.map(m => `<div class="bg-black border border-gray-800 p-6 rounded-2xl text-center"><div class="text-[9px] uppercase font-bold text-gray-500 mb-1">${m.l}</div><div class="text-3xl font-black italic ${m.c || 'text-white'}">${(m.v || 0).toFixed(1)}</div></div>`).join('');
 
-            // Advanced Table
             let html = `<table class="w-full text-left text-xs"><thead class="bg-gray-950 text-gray-500 uppercase text-[9px] tracking-widest"><tr><th class="p-4">Player</th><th>GP</th><th>PPG</th><th>RPG</th><th>2PT%</th><th>3PT%</th><th>FT%</th><th>AST/TO</th><th>H/L</th></tr></thead><tbody>`;
             for(let name in pMap) {
                 const p = pMap[name]; if(p.gp === 0) continue;
@@ -294,11 +296,11 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div class="p-2 border border-gray-800 rounded">
                                 <div class="text-[9px] uppercase text-gray-500">PPG</div>
-                                <div class="text-2xl font-black">${(stats.pts/stats.gp).toFixed(1)}</div>
+                                <div class="text-2xl font-black">${stats.gp > 0 ? (stats.pts/stats.gp).toFixed(1) : 0}</div>
                             </div>
                             <div class="p-2 border border-gray-800 rounded">
                                 <div class="text-[9px] uppercase text-gray-500">RPG</div>
-                                <div class="text-2xl font-black">${(stats.reb/stats.gp).toFixed(1)}</div>
+                                <div class="text-2xl font-black">${stats.gp > 0 ? (stats.reb/stats.gp).toFixed(1) : 0}</div>
                             </div>
                         </div>
                     </div>
@@ -335,42 +337,92 @@
             const file = input.files[0]; if(!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
-                const text = e.target.result;
-                const rows = text.split('\n').filter(r => r.trim() !== "");
-                const headers = rows[0].toLowerCase().split(',').map(h => h.trim());
-                const gamesMap = {};
-                for (let i = 1; i < rows.length; i++) {
-                    const data = rows[i].split(',').map(d => d.trim());
-                    const entry = {}; headers.forEach((h, idx) => entry[h] = data[idx]);
-                    const key = `${entry.date}_${entry.opponent}`;
-                    if(!gamesMap[key]) gamesMap[key] = { date: entry.date, opp: entry.opponent, stats: [] };
-                    const pStat = { 
-                        name: entry.player, fg2m: parseInt(entry.fg2m)||0, fg2a: parseInt(entry.fg2a)||0,
-                        fg3m: parseInt(entry.fg3m)||0, fg3a: parseInt(entry.fg3a)||0,
-                        ftm: parseInt(entry.ftm)||0, fta: parseInt(entry.fta)||0,
-                        reb: parseInt(entry.reb)||0, ast: parseInt(entry.ast)||0,
-                        stl: parseInt(entry.stl)||0, to: parseInt(entry.to)||0
+                try {
+                    const text = e.target.result;
+                    // Support both Windows (\r\n) and Mac/Linux (\n) line endings
+                    const rows = text.replace(/\r/g, '').split('\n').filter(r => r.trim() !== "");
+                    const headers = rows[0].toLowerCase().split(',').map(h => h.trim());
+                    
+                    const gamesMap = {};
+
+                    // Mappings to match export headers to code keys
+                    const mapping = {
+                        'date': 'date',
+                        'opponent': 'opp',
+                        'player': 'name',
+                        '2pm': 'fg2m',
+                        '2pa': 'fg2a',
+                        '3pm': 'fg3m',
+                        '3pa': 'fg3a',
+                        'ftm': 'ftm',
+                        'fta': 'fta',
+                        'reb': 'reb',
+                        'ast': 'ast',
+                        'stl': 'stl',
+                        'to': 'to',
+                        'pts': 'pts'
                     };
-                    pStat.pts = (pStat.fg2m*2)+(pStat.fg3m*3)+pStat.ftm;
-                    gamesMap[key].stats.push(pStat);
+
+                    for (let i = 1; i < rows.length; i++) {
+                        const data = rows[i].split(',').map(d => d.trim());
+                        const entry = {}; 
+                        headers.forEach((h, idx) => {
+                            if (mapping[h]) {
+                                entry[mapping[h]] = data[idx];
+                            }
+                        });
+
+                        const key = `${entry.date}_${entry.opp}`;
+                        if (!gamesMap[key]) {
+                            gamesMap[key] = { date: entry.date, opp: entry.opp, stats: [] };
+                        }
+
+                        const pStat = { 
+                            name: entry.name, 
+                            fg2m: parseInt(entry.fg2m)||0, 
+                            fg2a: parseInt(entry.fg2a)||0,
+                            fg3m: parseInt(entry.fg3m)||0, 
+                            fg3a: parseInt(entry.fg3a)||0,
+                            ftm: parseInt(entry.ftm)||0, 
+                            fta: parseInt(entry.fta)||0,
+                            reb: parseInt(entry.reb)||0, 
+                            ast: parseInt(entry.ast)||0,
+                            stl: parseInt(entry.stl)||0, 
+                            to: parseInt(entry.to)||0
+                        };
+                        // Always re-calculate pts to ensure accuracy based on makes
+                        pStat.pts = (pStat.fg2m * 2) + (pStat.fg3m * 3) + pStat.ftm;
+                        gamesMap[key].stats.push(pStat);
+                    }
+
+                    const h = JSON.parse(localStorage.getItem('eagleStatsV3') || '[]');
+                    Object.values(gamesMap).forEach(g => h.push(g));
+                    localStorage.setItem('eagleStatsV3', JSON.stringify(h));
+                    alert("Import successful, Coach!"); 
+                    location.reload();
+                } catch (err) {
+                    alert("Error processing CSV. Please ensure you are using the template exported from this site.");
                 }
-                const h = JSON.parse(localStorage.getItem('eagleStatsV3') || '[]');
-                Object.values(gamesMap).forEach(g => h.push(g));
-                localStorage.setItem('eagleStatsV3', JSON.stringify(h));
-                alert("Import Complete!"); location.reload();
             };
             reader.readAsText(file);
         }
 
         function exportToCSV() {
             const h = JSON.parse(localStorage.getItem('eagleStatsV3') || '[]');
+            // Headers match exactly what handleImport mapping expects
             let c = "Date,Opponent,Player,2PM,2PA,3PM,3PA,FTM,FTA,REB,AST,STL,TO,PTS\n";
-            h.forEach(g => g.stats.forEach(s => c += `${g.date},${g.opp},${s.name},${s.fg2m},${s.fg2a},${s.fg3m},${s.fg3a},${s.ftm},${s.fta},${s.reb},${s.ast},${s.stl},${s.to},${s.pts}\n`));
-            const b = new Blob([c], {type:'text/csv'}), u = URL.createObjectURL(b), a = document.createElement('a');
+            h.forEach(g => {
+                g.stats.forEach(s => {
+                    c += `${g.date},${g.opp},${s.name},${s.fg2m},${s.fg2a},${s.fg3m},${s.fg3a},${s.ftm},${s.fta},${s.reb},${s.ast},${s.stl},${s.to},${s.pts}\n`;
+                });
+            });
+            const b = new Blob([c], {type:'text/csv'});
+            const u = URL.createObjectURL(b);
+            const a = document.createElement('a');
             a.href = u; a.download = 'Eagles_Stats_Full.csv'; a.click();
         }
 
-        function clearData() { if(confirm("Coach, reset season?")) { localStorage.removeItem('eagleStatsV3'); location.reload(); } }
+        function clearData() { if(confirm("Coach, are you sure? This will permanently delete all local game data.")) { localStorage.removeItem('eagleStatsV3'); location.reload(); } }
     </script>
 </body>
 </html>
