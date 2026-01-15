@@ -3,102 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eagles Basketball Stats</title>
+    <title>Eagles Basketball Analytics</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --eagle-gold: #FFB81C;
-            --eagle-black: #000000;
-        }
+        :root { --eagle-gold: #FFB81C; --eagle-black: #000000; }
         .bg-gold { background-color: var(--eagle-gold); }
         .text-gold { color: var(--eagle-gold); }
         .border-gold { border-color: var(--eagle-gold); }
-        .accent-gold { accent-color: var(--eagle-gold); }
-        
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        .stat-input {
-            width: 45px;
-            background-color: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 4px;
-            padding: 4px;
-            text-align: center;
-            color: white;
-            font-size: 0.875rem;
-        }
-        .stat-input:focus {
-            border-color: var(--eagle-gold);
-            outline: none;
-            background-color: #222;
-        }
+        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .stat-input { width: 42px; background: #111; border: 1px solid #333; border-radius: 4px; padding: 4px; text-align: center; color: white; font-size: 0.75rem; transition: all 0.2s; }
+        .stat-input:focus { border-color: var(--eagle-gold); outline: none; background: #222; box-shadow: 0 0 5px rgba(255, 184, 28, 0.3); }
+        .sticky-col { position: sticky; left: 0; background-color: #000; z-index: 10; border-right: 2px solid #333; }
+        @media (max-width: 768px) { .stat-input { width: 38px; font-size: 0.7rem; } }
     </style>
 </head>
 <body class="bg-gray-950 text-white font-sans min-h-screen">
 
     <div class="max-w-7xl mx-auto pb-20">
-        <!-- Branding Header -->
+        <!-- Main Navigation Header -->
         <header class="sticky top-0 z-50 bg-black border-b-4 border-gold p-4 md:p-6 shadow-2xl flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-4">
-                <div class="bg-white w-12 h-12 rounded-full flex items-center justify-center border-2 border-gold shadow-inner">
+                <div class="bg-white w-12 h-12 rounded-full flex items-center justify-center border-2 border-gold shadow-lg transform rotate-3">
                     <span class="text-2xl">🦅</span>
                 </div>
                 <div>
-                    <h1 class="text-3xl font-black italic tracking-tighter uppercase leading-none">Eagles <span class="text-gold">Basketball</span></h1>
-                    <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-1">Girls High School Stat Portal</p>
+                    <h1 class="text-3xl font-black italic uppercase tracking-tighter leading-none">Eagles <span class="text-gold">Analytics</span></h1>
+                    <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-1">Girls Varsity Basketball</p>
                 </div>
             </div>
-            
-            <div class="flex gap-2">
-                <button onclick="toggleView('entry')" id="btn-entry" class="bg-gold text-black px-4 py-2 rounded-full font-bold text-xs uppercase shadow-lg hover:scale-105 transition-transform">
-                    Enter Stats
-                </button>
-                <button onclick="toggleView('summary')" id="btn-summary" class="bg-gray-800 text-white px-4 py-2 rounded-full font-bold text-xs uppercase shadow-lg hover:scale-105 transition-transform">
-                    Season Summary
-                </button>
+            <div class="flex gap-2 bg-gray-900 p-1 rounded-full">
+                <button onclick="toggleView('entry')" id="btn-entry" class="px-6 py-2 rounded-full font-bold text-xs uppercase transition-all">New Game</button>
+                <button onclick="toggleView('summary')" id="btn-summary" class="px-6 py-2 rounded-full font-bold text-xs uppercase transition-all">Season Summary</button>
             </div>
         </header>
 
         <!-- GAME ENTRY VIEW -->
-        <main id="view-entry" class="p-4 md:p-8">
-            <div class="bg-black border border-gray-800 rounded-xl overflow-hidden shadow-2xl">
-                <div class="p-6 bg-gray-900 border-b border-gray-800 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-gold text-[10px] font-bold uppercase mb-1">Game Date</label>
-                        <input type="date" id="gameDate" class="w-full bg-black border border-gray-700 p-3 rounded text-white focus:border-gold outline-none">
+        <main id="view-entry" class="p-4 md:p-8 animate-fadeIn">
+            <div class="bg-black border border-gray-800 rounded-2xl shadow-2xl overflow-hidden">
+                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-900 border-b border-gray-800">
+                    <div class="space-y-1">
+                        <label class="text-[10px] text-gold font-bold uppercase tracking-widest">Game Date</label>
+                        <input type="date" id="gameDate" class="w-full bg-black border border-gray-700 p-3 rounded-lg text-white focus:border-gold outline-none">
                     </div>
-                    <div>
-                        <label class="block text-gold text-[10px] font-bold uppercase mb-1">Opponent</label>
-                        <input type="text" id="opponent" placeholder="Enter Opponent Name..." class="w-full bg-black border border-gray-700 p-3 rounded text-white focus:border-gold outline-none">
+                    <div class="space-y-1">
+                        <label class="text-[10px] text-gold font-bold uppercase tracking-widest">Opponent</label>
+                        <input type="text" id="opponent" placeholder="e.g., Central High Warriors" class="w-full bg-black border border-gray-700 p-3 rounded-lg text-white focus:border-gold outline-none">
                     </div>
                 </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
                         <thead>
-                            <tr class="bg-gray-950 text-gold text-[9px] uppercase tracking-tighter border-b border-gray-800">
-                                <th class="p-4 sticky left-0 bg-gray-950 min-w-[140px]">Player</th>
+                            <tr class="bg-gray-950 text-gold text-[9px] uppercase border-b border-gray-800">
+                                <th class="p-4 sticky-col">Player</th>
                                 <th class="p-2 text-center">2PM</th><th class="p-2 text-center">2PA</th>
                                 <th class="p-2 text-center">3PM</th><th class="p-2 text-center">3PA</th>
                                 <th class="p-2 text-center">FTM</th><th class="p-2 text-center">FTA</th>
                                 <th class="p-2 text-center">REB</th><th class="p-2 text-center">AST</th>
-                                <th class="p-2 text-center">STL</th><th class="p-2 text-center">TO</th>
-                                <th class="p-2 text-center">FLS</th>
+                                <th class="p-2 text-center">STL</th><th class="p-2 text-center">TO</th><th class="p-2 text-center">FLS</th>
                             </tr>
                         </thead>
                         <tbody id="rosterRows">
-                            <!-- Players injected by JS -->
+                            <!-- JS will inject players here -->
                         </tbody>
                     </table>
                 </div>
 
-                <div class="p-6 bg-gray-900 border-t border-gray-800">
-                    <button onclick="saveGame()" class="w-full bg-gold text-black py-4 rounded-lg font-black text-xl hover:bg-yellow-500 transition-all shadow-xl uppercase transform active:scale-95">
-                        Commit Game to Season History
+                <div class="p-8 bg-gray-900 border-t border-gray-800">
+                    <button onclick="saveGame()" class="w-full bg-gold text-black py-5 rounded-xl font-black text-xl uppercase shadow-2xl hover:bg-yellow-500 transition-all transform active:scale-95">
+                        Record Game Results
                     </button>
                 </div>
             </div>
@@ -106,45 +79,42 @@
 
         <!-- SUMMARY VIEW -->
         <main id="view-summary" class="hidden p-4 md:p-8 space-y-8">
-            <!-- Team Stats Grid -->
+            <!-- Team Overview Dashboard -->
             <div id="team-stats-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <!-- Data injected by JS -->
             </div>
 
-            <!-- Player Stats Table -->
-            <div class="bg-black border border-gray-800 rounded-xl overflow-hidden shadow-2xl">
-                <div class="p-4 bg-gray-900 border-b border-gray-800 flex justify-between items-center">
-                    <h2 class="text-lg font-black italic uppercase text-gold">Player Analytics (Season)</h2>
-                    <button onclick="exportToCSV()" class="text-[10px] bg-gray-800 hover:bg-gray-700 text-white px-3 py-1 rounded border border-gray-600 uppercase">Export CSV</button>
+            <!-- Advanced Analytics Table -->
+            <div class="bg-black border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
+                <div class="p-5 bg-gray-900 border-b border-gray-800 flex justify-between items-center">
+                    <h2 class="text-xl font-black text-gold uppercase italic tracking-tight">Season Averages & Efficiency</h2>
+                    <button onclick="exportToCSV()" class="text-[10px] bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-bold uppercase border border-gray-700">Export Season CSV</button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left">
-                        <thead>
-                            <tr class="bg-gray-950 text-gray-500 text-[10px] uppercase border-b border-gray-800">
+                        <thead class="bg-gray-950 text-gray-500 uppercase text-[10px] tracking-wider">
+                            <tr>
                                 <th class="p-4">Player</th>
-                                <th class="p-2">GP</th>
-                                <th class="p-2">PPG</th>
-                                <th class="p-2">RPG</th>
-                                <th class="p-2">APG</th>
-                                <th class="p-2">PTS (H/L)</th>
-                                <th class="p-2">TO (H/L)</th>
+                                <th class="p-2">GP</th><th class="p-2">PPG</th>
+                                <th class="p-2">2PT %</th><th class="p-2">3PT %</th><th class="p-2">FT %</th>
+                                <th class="p-2">AST/TO</th><th class="p-2">H/L (Pts)</th>
                             </tr>
                         </thead>
-                        <tbody id="summaryRows">
-                            <!-- Summary injected by JS -->
+                        <tbody id="advancedSummary">
+                            <!-- Stats injected by JS -->
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Clear History -->
-            <div class="flex justify-center pt-10">
-                <button onclick="clearData()" class="text-red-500 text-[10px] uppercase border border-red-900 px-4 py-2 rounded hover:bg-red-950">Clear Season History</button>
+            <div class="flex justify-center pt-20">
+                <button onclick="clearData()" class="text-[10px] text-red-900 uppercase border border-red-900 px-6 py-2 rounded-full hover:bg-red-950 transition-colors">Wipe History (End of Season)</button>
             </div>
         </main>
     </div>
 
     <script>
+        // Data Structure mirroring your Stat Sheet
         const ROSTER = [
             {id: 1, name: "Brittney Tang"}, {id: 2, name: "Kylie Mulcahy"},
             {id: 3, name: "Mikayla Sanders"}, {id: 4, name: "Lexi Guild"},
@@ -155,182 +125,126 @@
             {id: 44, name: "Olivia Fraser"}
         ];
 
-        const STAT_KEYS = ['fg2m', 'fg2a', 'fg3m', 'fg3a', 'ftm', 'fta', 'reb', 'ast', 'stl', 'to', 'fouls'];
+        const STATS = ['fg2m', 'fg2a', 'fg3m', 'fg3a', 'ftm', 'fta', 'reb', 'ast', 'stl', 'to', 'fouls'];
 
-        // Initial Load
         window.onload = () => {
             const table = document.getElementById('rosterRows');
             ROSTER.forEach(p => {
                 const row = document.createElement('tr');
                 row.className = "border-b border-gray-900 hover:bg-gray-950 transition-colors";
-                row.innerHTML = `
-                    <td class="p-4 font-bold text-sm text-gray-300 sticky left-0 bg-gray-950 border-r border-gray-800">
-                        <span class="text-gold mr-2 font-mono">#${String(p.id).padStart(2, '0')}</span> ${p.name}
-                    </td>
-                    ${STAT_KEYS.map(key => `
-                        <td class="p-2 text-center">
-                            <input type="number" data-player="${p.name}" data-stat="${key}" class="stat-input" min="0">
-                        </td>
-                    `).join('')}
-                `;
+                row.innerHTML = `<td class="p-4 font-bold text-gray-300 sticky-col">#${p.id} ${p.name}</td>` + 
+                    STATS.map(s => `
+                    <td class="p-2 text-center"><input type="number" data-player="${p.name}" data-stat="${s}" class="stat-input" min="0"></td>
+                `).join('');
                 table.appendChild(row);
             });
-            // Set default date
             document.getElementById('gameDate').valueAsDate = new Date();
+            toggleView('entry');
         };
 
-        function toggleView(view) {
-            document.getElementById('view-entry').classList.toggle('hidden', view !== 'entry');
-            document.getElementById('view-summary').classList.toggle('hidden', view !== 'summary');
+        function toggleView(v) {
+            document.getElementById('view-entry').classList.toggle('hidden', v !== 'entry');
+            document.getElementById('view-summary').classList.toggle('hidden', v !== 'summary');
             
-            document.getElementById('btn-entry').className = view === 'entry' ? 
-                'bg-gold text-black px-4 py-2 rounded-full font-bold text-xs uppercase shadow-lg' : 
-                'bg-gray-800 text-white px-4 py-2 rounded-full font-bold text-xs uppercase shadow-lg';
-                
-            document.getElementById('btn-summary').className = view === 'summary' ? 
-                'bg-gold text-black px-4 py-2 rounded-full font-bold text-xs uppercase shadow-lg' : 
-                'bg-gray-800 text-white px-4 py-2 rounded-full font-bold text-xs uppercase shadow-lg';
-
-            if (view === 'summary') calculateSeasonStats();
+            const common = "px-6 py-2 rounded-full font-bold text-xs uppercase transition-all ";
+            document.getElementById('btn-entry').className = common + (v === 'entry' ? "bg-gold text-black shadow-lg" : "text-gray-400 hover:text-white");
+            document.getElementById('btn-summary').className = common + (v === 'summary' ? "bg-gold text-black shadow-lg" : "text-gray-400 hover:text-white");
+            
+            if(v === 'summary') calculateSeasonStats();
         }
 
         function saveGame() {
-            const opponent = document.getElementById('opponent').value;
-            if (!opponent) return alert("Please enter the Opponent Name.");
-
-            const gameData = {
-                date: document.getElementById('gameDate').value,
-                opponent: opponent,
-                playerStats: []
+            const history = JSON.parse(localStorage.getItem('eagleStatsFinal') || '[]');
+            const game = { 
+                date: document.getElementById('gameDate').value, 
+                opp: document.getElementById('opponent').value || 'TBD', 
+                stats: [] 
             };
-
+            
             ROSTER.forEach(p => {
-                const stats = { name: p.name, id: p.id };
-                document.querySelectorAll(`[data-player="${p.name}"]`).forEach(input => {
-                    stats[input.dataset.stat] = parseInt(input.value) || 0;
-                });
-                // Math Logic
-                stats.points = (stats.fg2m * 2) + (stats.fg3m * 3) + stats.ftm;
-                gameData.playerStats.push(stats);
+                const s = { name: p.name, id: p.id };
+                document.querySelectorAll(`[data-player="${p.name}"]`).forEach(i => s[i.dataset.stat] = parseInt(i.value) || 0);
+                // The Score Math: 2s + 3s + FTs
+                s.pts = (s.fg2m * 2) + (s.fg3m * 3) + s.ftm;
+                game.stats.push(s);
             });
-
-            const history = JSON.parse(localStorage.getItem('eagleStatsHistory') || '[]');
-            history.push(gameData);
-            localStorage.setItem('eagleStatsHistory', JSON.stringify(history));
-
-            alert(`Game against ${opponent} has been recorded!`);
+            
+            history.push(game);
+            localStorage.setItem('eagleStatsFinal', JSON.stringify(history));
+            alert("Coach, game data recorded!");
             location.reload();
         }
 
         function calculateSeasonStats() {
-            const history = JSON.parse(localStorage.getItem('eagleStatsHistory') || '[]');
-            if (history.length === 0) {
-                document.getElementById('summaryRows').innerHTML = `<tr><td colspan="7" class="p-10 text-center text-gray-600 uppercase tracking-widest">No game data recorded yet</td></tr>`;
-                return;
-            }
-
+            const history = JSON.parse(localStorage.getItem('eagleStatsFinal') || '[]');
             const pMap = {};
             const team = { pts: 0, reb: 0, ast: 0, stl: 0, to: 0, gp: history.length };
-
-            ROSTER.forEach(r => {
-                pMap[r.name] = { 
-                    gp: 0, pts: 0, reb: 0, ast: 0, to: 0, 
-                    h_pts: 0, l_pts: Infinity, 
-                    h_to: 0, l_to: Infinity 
-                };
+            
+            ROSTER.forEach(r => pMap[r.name] = { 
+                gp:0, pts:0, fg2m:0, fg2a:0, fg3m:0, fg3a:0, ftm:0, fta:0, reb:0, ast:0, stl:0, to:0, h:0, l:Infinity 
             });
 
             history.forEach(game => {
-                game.playerStats.forEach(s => {
+                game.stats.forEach(s => {
                     const p = pMap[s.name];
-                    p.gp++;
-                    p.pts += s.points;
-                    p.reb += s.reb;
-                    p.ast += s.ast;
-                    p.to += s.to;
-
-                    team.pts += s.points;
-                    team.reb += s.reb;
-                    team.ast += s.ast;
-                    team.stl += s.stl;
-                    team.to += s.to;
-
-                    if (s.points > p.h_pts) p.h_pts = s.points;
-                    if (s.points < p.l_pts) p.l_pts = s.points;
-                    if (s.to > p.h_to) p.h_to = s.to;
-                    if (s.to < p.l_to) p.l_to = s.to;
+                    p.gp++; p.pts += s.pts; p.fg2m += s.fg2m; p.fg2a += s.fg2a; p.fg3m += s.fg3m; p.fg3a += s.fg3a; 
+                    p.ftm += s.ftm; p.fta += s.fta; p.reb += s.reb; p.ast += s.ast; p.stl += s.stl; p.to += s.to;
+                    team.pts += s.pts; team.reb += s.reb; team.ast += s.ast; team.stl += s.stl; team.to += s.to;
+                    if(s.pts > p.h) p.h = s.pts; if(s.pts < p.l) p.l = s.pts;
                 });
             });
 
-            renderSummary(pMap, team);
+            renderSummaryUI(pMap, team);
         }
 
-        function renderSummary(pMap, team) {
-            const rows = document.getElementById('summaryRows');
+        function renderSummaryUI(pMap, team) {
+            const rows = document.getElementById('advancedSummary');
             rows.innerHTML = '';
             
-            for (let name in pMap) {
-                const p = pMap[name];
-                if (p.gp === 0) continue;
+            for(let name in pMap) {
+                const p = pMap[name]; if(p.gp === 0) continue;
+                const pct = (m, a) => a > 0 ? ((m/a)*100).toFixed(0) + '%' : '0%';
+                const astTo = p.to > 0 ? (p.ast / p.to).toFixed(1) : (p.ast > 0 ? p.ast.toFixed(1) : '0.0');
                 
-                const row = document.createElement('tr');
-                row.className = "border-b border-gray-900 hover:bg-gray-900";
-                row.innerHTML = `
-                    <td class="p-4 font-bold text-gold">${name}</td>
-                    <td class="p-2 text-gray-400">${p.gp}</td>
-                    <td class="p-2 text-white font-black">${(p.pts/p.gp).toFixed(1)}</td>
-                    <td class="p-2 text-gray-300">${(p.reb/p.gp).toFixed(1)}</td>
-                    <td class="p-2 text-gray-300">${(p.ast/p.gp).toFixed(1)}</td>
-                    <td class="p-2"><span class="text-green-500 font-bold">${p.h_pts}</span> <span class="text-gray-600">/</span> <span class="text-red-500">${p.l_pts}</span></td>
-                    <td class="p-2"><span class="text-red-500 font-bold">${p.h_to}</span> <span class="text-gray-600">/</span> <span class="text-green-500">${p.l_to}</span></td>
-                `;
-                rows.appendChild(row);
+                rows.innerHTML += `
+                    <tr class="border-b border-gray-900 transition-all hover:bg-gray-900">
+                        <td class="p-4 font-bold text-gold">${name}</td>
+                        <td class="p-2 text-gray-500">${p.gp}</td>
+                        <td class="p-2 text-white font-black text-lg">${(p.pts/p.gp).toFixed(1)}</td>
+                        <td class="p-2">${pct(p.fg2m, p.fg2a)}</td>
+                        <td class="p-2 text-gold font-bold">${pct(p.fg3m, p.fg3a)}</td>
+                        <td class="p-2">${pct(p.ftm, p.fta)}</td>
+                        <td class="p-2 font-mono ${astTo < 1 ? 'text-red-500' : 'text-green-500'}">${astTo}</td>
+                        <td class="p-2 text-[10px]"><span class="text-green-500 font-bold">${p.h}</span> / <span class="text-red-500">${p.l}</span></td>
+                    </tr>`;
             }
 
             const grid = document.getElementById('team-stats-grid');
             const metrics = [
-                {label: 'Team PPG', val: (team.pts/team.gp).toFixed(1)},
-                {label: 'Team RPG', val: (team.reb/team.gp).toFixed(1)},
-                {label: 'Team APG', val: (team.ast/team.gp).toFixed(1)},
-                {label: 'Team SPG', val: (team.stl/team.gp).toFixed(1)},
-                {label: 'Turnovers', val: (team.to/team.gp).toFixed(1), color: 'text-red-500'}
+                {l:'Points (PPG)', v:(team.pts/team.gp)}, 
+                {l:'Rebounds (RPG)', v:(team.reb/team.gp)}, 
+                {l:'Assists (APG)', v:(team.ast/team.gp)}, 
+                {l:'Steals (SPG)', v:(team.stl/team.gp)}, 
+                {l:'Turnovers (TPG)', v:(team.to/team.gp), c:'text-red-500'}
             ];
             grid.innerHTML = metrics.map(m => `
-                <div class="bg-black border border-gray-800 p-4 rounded-xl text-center shadow-lg">
-                    <div class="text-[9px] uppercase font-bold text-gray-500 tracking-widest mb-1">${m.label}</div>
-                    <div class="text-2xl font-black italic ${m.color || 'text-white'}">${m.val}</div>
-                </div>
-            `).join('');
+                <div class="bg-black border border-gray-800 p-6 rounded-2xl text-center shadow-xl">
+                    <div class="text-[9px] uppercase font-bold text-gray-500 tracking-widest mb-1">${m.l}</div>
+                    <div class="text-3xl font-black italic tracking-tighter ${m.c || 'text-white'}">${(m.v || 0).toFixed(1)}</div>
+                </div>`).join('');
         }
 
         function exportToCSV() {
-            const history = JSON.parse(localStorage.getItem('eagleStatsHistory') || '[]');
-            if (history.length === 0) return alert("No data to export.");
-
-            let csv = "Date,Opponent,Player,2PM,2PA,3PM,3PA,FTM,FTA,REB,AST,STL,TO,PTS\n";
-            history.forEach(game => {
-                game.playerStats.forEach(p => {
-                    csv += `${game.date},${game.opponent},${p.name},${p.fg2m},${p.fg2a},${p.fg3m},${p.fg3a},${p.ftm},${p.fta},${p.reb},${p.ast},${p.stl},${p.to},${p.points}\n`;
-                });
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('hidden', '');
-            a.setAttribute('href', url);
-            a.setAttribute('download', 'eagles_season_stats.csv');
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            const h = JSON.parse(localStorage.getItem('eagleStatsFinal') || '[]');
+            if(h.length === 0) return alert("No season data found.");
+            let c = "Date,Opponent,Player,2PM,2PA,3PM,3PA,FTM,FTA,REB,AST,STL,TO,PTS\n";
+            h.forEach(g => g.stats.forEach(s => c += `${g.date},${g.opp},${s.name},${s.fg2m},${s.fg2a},${s.fg3m},${s.fg3a},${s.ftm},${s.fta},${s.reb},${s.ast},${s.stl},${s.to},${s.pts}\n`));
+            const blob = new Blob([c], {type: 'text/csv'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'Eagles_Stats_Season.csv'; a.click();
         }
 
-        function clearData() {
-            if (confirm("Coach, are you sure? This will delete the entire season history for the Eagles.")) {
-                localStorage.removeItem('eagleStatsHistory');
-                location.reload();
-            }
-        }
+        function clearData() { if(confirm("Coach: This will permanently wipe the season history. Proceed?")) { localStorage.removeItem('eagleStatsFinal'); location.reload(); } }
     </script>
 </body>
 </html>
